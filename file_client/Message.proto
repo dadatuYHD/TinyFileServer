@@ -1,0 +1,5 @@
+message FILE_DATA
+{
+    required string p_cmd_buf  = 1;
+    optional string p_data_buf = 2;
+}

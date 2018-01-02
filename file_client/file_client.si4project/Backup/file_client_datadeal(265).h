@@ -1,0 +1,4 @@
+#ifndef _FILE_CLIENT_DATADEAL_H_
+#define _FILE_CLIENT_DATADEAL_H_
+
+#endif
