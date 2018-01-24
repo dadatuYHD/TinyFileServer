@@ -119,7 +119,7 @@ int client_send_data(int i_connect_fd, void *cp_buf, int i_bufsize)
 
     while (i_total_send_bytes < i_bufsize)
     {
-        i_send_bytes = send(i_connect_fd, (char *)cp_buf, i_bufsize - i_total_send_bytes, 0);
+        i_send_bytes = send(i_connect_fd, (char *)cp_buf, i_bufsize - i_send_bytes, 0);
 		if (-1 == i_send_bytes)
 		{
             perror("send");

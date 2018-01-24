@@ -121,7 +121,7 @@ int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf)
 
 	FILEDATA *st_unpack_data = NULL;
 
-	st_unpack_data = file__data__unpack(NULL, g_st_test_hdr.ui_dat_len, cp_pack_buf);
+	st_unpack_data = file__data__unpack(NULL, g_stp_test_hdr->ui_dat_len, cp_pack_buf);
     if (NULL == st_unpack_data) {
         file_error("[%s]file__data__unpack is error!\n", __FUNCTION__);
 	    return FILEDATA_DEAL_RET_FAIL;    
@@ -129,7 +129,7 @@ int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf)
 
     st_unpack_data->p_data_buf = NULL;
 
-	*cp_unpack_buf = (char *)malloc(g_st_test_hdr.ui_dat_len + 1);
+	*cp_unpack_buf = (char *)malloc(g_stp_test_hdr->ui_dat_len + 1);
 	if (NULL == *cp_unpack_buf) {
         file_error("[%s]malloc is error!\n", __FUNCTION__);
 	    return FILEDATA_DEAL_RET_FAIL;    

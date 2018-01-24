@@ -135,7 +135,7 @@ int datadeal_file_list(int i_connect_fd)
 		file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
 		file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
         for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", c_pack_buf_a[i]);
+            file_printf("%X\n", c_pack_buf_a[i]);
 		}
 		
 	}
