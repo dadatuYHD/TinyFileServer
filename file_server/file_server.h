@@ -13,6 +13,8 @@ int server_init_socket(int iPort);
 int server_deal_client_request(void);
 int server_get_listenfd(void);
 int server_recv_data(int i_connect_fd, void *p_buf, int i_bufsize);
+int server_send_data(int i_connect_fd, void *p_buf, int i_bufsize);
+
 
 
 

@@ -110,16 +110,16 @@ int client_data_interaction(void)
 }
 
 
-int client_send_data(int i_connect_fd, void *cp_buf, int i_bufsize)
+int client_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
 {
-    assert(NULL != cp_buf);
+    assert(NULL != p_buf);
 
 	int i_send_bytes = 0;
 	int i_total_send_bytes = 0;
 
     while (i_total_send_bytes < i_bufsize)
     {
-        i_send_bytes = send(i_connect_fd, (char *)cp_buf, i_bufsize - i_total_send_bytes, 0);
+        i_send_bytes = send(i_connect_fd, (char *)p_buf, i_bufsize - i_total_send_bytes, 0);
 		if (-1 == i_send_bytes)
 		{
             perror("send");
@@ -132,4 +132,29 @@ int client_send_data(int i_connect_fd, void *cp_buf, int i_bufsize)
 	return i_total_send_bytes;
 }
 
+int client_recv_data(int i_connect_fd, void *p_buf, int i_bufsize)
+{
+    assert(NULL != p_buf);
+
+    int i_recv_bytes = 0;
+	int i_total_recv_bytes = 0;
+    int i_ret = FILE_CLIENT_OK;
+
+    while (i_total_recv_bytes < i_bufsize) {
+        i_recv_bytes = recv(i_connect_fd, (char *)p_buf, i_bufsize - i_total_recv_bytes, 0);
+	    if (-1 == i_recv_bytes) {
+            perror("recv");
+		    close(i_connect_fd);
+		    return FILE_CLIENT_ERROR;
+	    } else if (0 ==i_recv_bytes) {
+            file_running("peer is shutdown\n");
+		    close(i_connect_fd);
+		    return FILE_CLIENT_RECV_PEER_DOWN;
+		} else {
+		    i_total_recv_bytes += i_recv_bytes;
+	    }     
+	}
+
+    return i_total_recv_bytes;
+}
 

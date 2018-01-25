@@ -41,28 +41,17 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 {
     assert(NULL != pst_test_hdr);
 
-    if (en_flg == HDR_FIELD_VERSION)
-    {
+    if (en_flg == HDR_FIELD_VERSION) {
         g_st_test_hdr.en_version = pst_test_hdr->en_version;   
-	}
-	else if (en_flg == HDR_FIELD_HDR_LEN)
-    {
+	} else if (en_flg == HDR_FIELD_HDR_LEN) {
         g_st_test_hdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
-	}
-    else if (en_flg == HDR_FIELD_DATA_LEN)
-    {
+	} else if (en_flg == HDR_FIELD_DATA_LEN) {
         g_st_test_hdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
-	}
-	else if (en_flg == HDR_FIELD_MODULE)
-    {
+	} else if (en_flg == HDR_FIELD_MODULE) {
         g_st_test_hdr.en_module = pst_test_hdr->en_module;   
-	}
-	else if (en_flg == HDR_FIELD_CMD)
-    {
+	} else if (en_flg == HDR_FIELD_CMD) {
         g_st_test_hdr.en_cmd = pst_test_hdr->en_cmd;   
-	}
-	else
-	{
+	} else {
 	    file_error("[%s]datadeal_set_hdr input flag is error!\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;   
 	}
@@ -96,16 +85,15 @@ int datadeal_file_list(int i_connect_fd)
 	int i_pack_len = 0;
 	int i_ret = FILE_CLIENT_OK;
 	int i_send_bytes = 0;
+	char c_filename_buf_a[BUFSIZE];
 
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) 
-	{
+    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
         memset(c_unpack_buf_a, 0, sizeof(c_unpack_buf_a));
         strncpy(c_unpack_buf_a, "L", 1);
 		c_unpack_buf_a[1] = '\0';
 		
 		i_pack_len = datadeal_proto_pack(c_unpack_buf_a, &c_pack_buf_a);
-		if (i_pack_len == FILEDATA_DEAL_RET_FAIL)
-		{
+		if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
             file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
 			return FILEDATA_DEAL_RET_FAIL;
 		}
@@ -117,8 +105,7 @@ int datadeal_file_list(int i_connect_fd)
 
 		/*sned the g_st_test_hdr*/
         i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
-		if (i_ret == FILE_CLIENT_ERROR)
-		{
+		if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
 			return FILEDATA_DEAL_RET_FAIL;
 		}
@@ -126,8 +113,7 @@ int datadeal_file_list(int i_connect_fd)
 
 		/*sned the cmd pack data*/
         i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, i_pack_len);
-		if (i_send_bytes == FILE_CLIENT_ERROR)
-		{
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
 			return FILEDATA_DEAL_RET_FAIL;
 		}
@@ -137,14 +123,22 @@ int datadeal_file_list(int i_connect_fd)
         for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
             file_printf("%hhX\n", c_pack_buf_a[i]);
 		}
-		
+
+        file_running("server file as follow:\n");
+		while (1) {    
+			memset(c_filename_buf_a, 0, BUFSIZE);
+			i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, BUFSIZE);
+		    if (FILE_CLIENT_RECV_PEER_DOWN == i_ret) {
+                file_printf("recv filename data complete!\n");
+				break;
+			}
+			file_running("%s\n", c_filename_buf_a);
+		}	
 	}
-	if (g_st_test_hdr.en_module == MODULE_TEST_JSON)
-	{
+	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
 
 	}
-	if (g_st_test_hdr.en_module == MODULE_TEST_TLV)
-	{
+	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
 
 	}	
 }
@@ -161,13 +155,13 @@ int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf)
     file__data__init(&st_unpack_data);
 
 	/*padding data*/
-	st_unpack_data.p_cmd_buf = (char *)malloc(sizeof(BUFSIZE));
+	st_unpack_data.p_cmd_buf = (char *)malloc(BUFSIZE);
 	if (NULL == st_unpack_data.p_cmd_buf)
 	{
         file_error("[%s]malloc is error!\n", __FUNCTION__);
 	    return FILEDATA_DEAL_RET_FAIL;
 	}
-	strncpy(st_unpack_data.p_cmd_buf, cp_unpack_buf, sizeof(BUFSIZE));
+	strncpy(st_unpack_data.p_cmd_buf, cp_unpack_buf, BUFSIZE);
 	st_unpack_data.p_data_buf = NULL;
 
 	filedata_len = file__data__get_packed_size(&st_unpack_data);

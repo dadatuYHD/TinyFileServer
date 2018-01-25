@@ -8,7 +8,9 @@
 #include "Message.pb-c.h"
 #include "file_server_debug.h"
 #include "file_server.h"
-
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 
 #define BUFSIZE 1024
@@ -18,6 +20,7 @@ TEST_HDR_T *g_stp_test_hdr;   //全局数据头部指针
 
 
 int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf);
+int datadeal_file_list_deal(char *const cp_filename, int i_connect_fd);
 
 /************************************************************
 FUNCTION:datadeal_get_hdr()
@@ -30,9 +33,9 @@ TEST_HDR_T datadeal_get_hdr(void)
     return g_st_test_hdr;
 }
 
-TEST_HDR_T ** datadeal_get_phdr(void)
+TEST_HDR_T * datadeal_get_phdr(void)
 {
-    return &g_stp_test_hdr;
+    return &g_st_test_hdr;
 }
 
 
@@ -121,7 +124,7 @@ int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf)
 
 	FILEDATA *st_unpack_data = NULL;
 
-	st_unpack_data = file__data__unpack(NULL, g_stp_test_hdr->ui_dat_len, cp_pack_buf);
+	st_unpack_data = file__data__unpack(NULL, g_st_test_hdr.ui_dat_len, cp_pack_buf);
     if (NULL == st_unpack_data) {
         file_error("[%s]file__data__unpack is error!\n", __FUNCTION__);
 	    return FILEDATA_DEAL_RET_FAIL;    
@@ -129,7 +132,7 @@ int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf)
 
     st_unpack_data->p_data_buf = NULL;
 
-	*cp_unpack_buf = (char *)malloc(g_stp_test_hdr->ui_dat_len + 1);
+	*cp_unpack_buf = (char *)malloc(g_st_test_hdr.ui_dat_len + 1);
 	if (NULL == *cp_unpack_buf) {
         file_error("[%s]malloc is error!\n", __FUNCTION__);
 	    return FILEDATA_DEAL_RET_FAIL;    
@@ -141,18 +144,17 @@ int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf)
 	return FILEDATA_DEAL_RET_OK;
 }
 
-
 int datadeal_file_list(int i_connect_fd)
 {
     int i_ret = FILEDATA_DEAL_RET_OK;
 	int i_recv_data_bytes = 0;
-	char c_pack_buf_a[g_stp_test_hdr->ui_dat_len + 1];
+	char c_pack_buf_a[g_st_test_hdr.ui_dat_len + 1];
 	char * pc_unpack_buf = NULL;
 	
-    if (g_stp_test_hdr->en_module == MODULE_TEST_PROTO) {
+    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
 		/*recv cmd data from client*/
 		memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stp_test_hdr->ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
 	    if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
 		    close(i_connect_fd);
@@ -166,7 +168,7 @@ int datadeal_file_list(int i_connect_fd)
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
 		file_printf("c_pack_buf_a size = %d\n", sizeof(c_pack_buf_a));
-        for (int i = 0; i < g_stp_test_hdr->ui_dat_len; i++) {
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
 		}   
 		
@@ -181,6 +183,11 @@ int datadeal_file_list(int i_connect_fd)
 		switch (pc_unpack_buf[0]) {
             case 'L':
 				file_printf("success recv cmd list!\n");
+		        i_ret = datadeal_file_list_deal(".", i_connect_fd);
+                if (i_ret == FILEDATA_DEAL_RET_FAIL) {
+                    file_error("[%s]datadeal_file_list_deal is error!\n", __FUNCTION__);
+					return FILEDATA_DEAL_RET_FAIL;
+				}
 				break;
 		    case 'S':
 				break;
@@ -189,13 +196,63 @@ int datadeal_file_list(int i_connect_fd)
 			default:
 			    break;
 		}
-	} else if (g_stp_test_hdr->en_module == MODULE_TEST_JSON) {
+	} else if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
         
-	} else if (g_stp_test_hdr->en_module == MODULE_TEST_TLV) {
+	} else if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
 
 	} else {
         /*end of else*/
 	}
+}
+
+int datadeal_file_list_deal(const char *cp_filename, int i_connect_fd)
+{
+    DIR * p_mydir = NULL;
+	struct dirent * stp_dir_item = NULL;
+	int i_ret = FILEDATA_DEAL_RET_OK;
+	int i_send_bytes = 0;
+	struct stat st_file_info;
+	char c_filename_buf_a[BUFSIZE];
+	
+
+	p_mydir = opendir(cp_filename);
+	if (NULL == p_mydir) {
+       perror("opendir"); 
+	   return FILEDATA_DEAL_RET_FAIL;
+	}
+
+	while (NULL != (stp_dir_item = readdir(p_mydir))) {
+        if (strcmp(stp_dir_item->d_name, ".") == 0 || strcmp(stp_dir_item->d_name, "..")) {
+            continue;
+		}
+		memset(&st_file_info, 0, sizeof(st_file_info));
+        i_ret = stat(stp_dir_item->d_name, &st_file_info);
+		if (-1 == i_ret) {
+            perror("stat"); 
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		if (S_ISDIR(st_file_info.st_mode)) {
+#if 0
+            i_ret = datadeal_file_list_deal(stp_dir_item->d_name, i_connect_fd);
+			if (FILEDATA_DEAL_RET_FAIL == i_ret) {
+                file_error("[%s]datadeal_file_list_deal is error!\n", __FUNCTION__);
+				return FILEDATA_DEAL_RET_FAIL;    
+			}
+#endif			
+		} else {
+            memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
+			strcpy(c_filename_buf_a, stp_dir_item->d_name);
+			i_send_bytes = server_send_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
+			if (FILE_SERVER_ERROR == i_send_bytes) {
+                file_error("[%s]server_send_data is fail\n", __FUNCTION__);
+			    return FILEDATA_DEAL_RET_FAIL;   
+			}
+
+			file_printf("client_send_data send filename data %d bytes\n", i_send_bytes);			
+		}
+	}
+
+	closedir(p_mydir);
 }
 
 int datadeal_file_get(int i_connect_fd)
@@ -207,11 +264,3 @@ int datadeal_file_set(int i_connect_fd)
 {
         
 }
-
-
-
-
-
-
-
-
