@@ -1,4 +1,0 @@
-file_server: file_server_main.c file_server.c
-	gcc $^ -o $@ -lpthread -g
-clean:
-	rm -rf file_server
