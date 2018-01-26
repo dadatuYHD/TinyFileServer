@@ -6,7 +6,6 @@
 *.ko
 *.obj
 *.elf
-*.elf32
 
 # Linker output
 *.ilk
@@ -54,3 +53,7 @@ dkms.conf
 
 #windows sourceinsight project files
 *.si4project/
+
+#file server
+file_server
+file_client
