@@ -36,6 +36,7 @@ typedef enum {
     CMD_TEST_SET = 0,
     CMD_TEST_GET,
     CMD_TEST_LIST,
+    CMD_TEST_CLIENT_EXIT,
     CMD_MAX,
 }CMD_E;
 

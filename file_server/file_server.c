@@ -76,63 +76,66 @@ void * server_client_data_deal(void *arg)
 	int i_ret = FILE_SERVER_OK;
 	int i_recv_hdr_bytes = 0;
 
-    /*recv data hdr*/
-	stp_test_hdr = datadeal_get_phdr();
-	memset(stp_test_hdr, 0, sizeof(TEST_HDR_T));
-	i_recv_hdr_bytes = server_recv_data(i_connect_fd, stp_test_hdr, sizeof(TEST_HDR_T));
-	if (i_recv_hdr_bytes == FILE_SERVER_ERROR) {
-        file_error("[%s]server_recv_hdr data is error, close server!!\n", __FUNCTION__);
-		close(i_connect_fd);
-		return (void *)FILE_SERVER_ERROR;
-	} else if (i_recv_hdr_bytes == FILE_SERVER_RECV_PEER_DOWN) {
-        file_running("[%s]client close the connect!\n", __FUNCTION__);    
-	} else {
-        file_running("recv client data hdr is success!\n");
-		file_printf("server_recv_data recv hdr data %d bytes\n", i_recv_hdr_bytes);
-    }
-
-    /*data hdr version check*/
-	if (1 != stp_test_hdr->en_version) {
-        file_error("[%s]data hdr version check error, close server!!\n", __FUNCTION__);
-	    file_running("please recv data hdr again!\n");
-		return (void *)FILE_SERVER_ERROR;
+    while (1) {
+        /*recv data hdr*/
+	    file_running("start recv client data hdr!\n");
+        stp_test_hdr = datadeal_get_phdr();
+        memset(stp_test_hdr, 0, sizeof(TEST_HDR_T));
+        i_recv_hdr_bytes = server_recv_data(i_connect_fd, stp_test_hdr, sizeof(TEST_HDR_T));
+        if (i_recv_hdr_bytes == FILE_SERVER_ERROR) {
+            file_error("[%s]server_recv_hdr data is error, close server!!\n", __FUNCTION__);
+            close(i_connect_fd);
+            return (void *)FILE_SERVER_ERROR;
+        } else if (i_recv_hdr_bytes == FILE_SERVER_RECV_PEER_DOWN) {
+            file_running("[%s]client close the connect!\n", __FUNCTION__);    
+        } else {
+            file_running("recv client data hdr is success!\n");
+            file_printf("server_recv_data recv hdr data %d bytes\n", i_recv_hdr_bytes);
+        }
+        
+        /*data hdr version check*/
+        if (VERSION_ONE != stp_test_hdr->en_version) {
+            file_error("[%s]data hdr version check error, close server!!\n", __FUNCTION__);
+            file_running("please recv data hdr again!\n");
+            return (void *)FILE_SERVER_ERROR;
+        }
+        file_running("data hdr version check success!\n");
+        
+        if (i_recv_hdr_bytes != stp_test_hdr->us_hdr_len) {
+            file_error("[%s]data hdr  len check error, close server!!\n", __FUNCTION__);
+            file_running("please recv data hdr again!\n");
+            return (void *)FILE_SERVER_ERROR;    
+        }
+        file_running("data hdr len check success!\n");
+        
+        /*judge the TEST_HDR_T en_cmd field*/
+        if (stp_test_hdr->en_cmd == CMD_TEST_SET) {
+            i_ret = datadeal_file_set(i_connect_fd);
+            if (i_ret == FILEDATA_DEAL_RET_FAIL) {
+                file_error("[%s]datadeal_file_set is fail, close server!!\n", __FUNCTION__);
+                close(i_connect_fd);
+                return (void *)FILE_SERVER_ERROR;
+            }
+        } else if (stp_test_hdr->en_cmd == CMD_TEST_GET) {
+            i_ret = datadeal_file_get(i_connect_fd);
+            if (i_ret == FILEDATA_DEAL_RET_FAIL) {
+                file_error("[%s]datadeal_file_get is fail, close server!!\n", __FUNCTION__);
+                close(i_connect_fd);
+                return (void *)FILE_SERVER_ERROR;
+            }
+        } else if (stp_test_hdr->en_cmd == CMD_TEST_LIST) {
+            i_ret = datadeal_file_list(i_connect_fd);
+            if (i_ret == FILEDATA_DEAL_RET_FAIL) {
+                file_error("[%s]datadeal_file_list is fail, close server!!\n", __FUNCTION__);
+                close(i_connect_fd);
+                return (void *)FILE_SERVER_ERROR;
+            }
+        } else if (stp_test_hdr->en_cmd == CMD_TEST_CLIENT_EXIT) {
+            file_running("server close!\n");
+            close(i_connect_fd);
+            return (void *)FILE_SERVER_OK;        
+		}    
 	}
-	file_running("data hdr version check success!\n");
-
-	if (i_recv_hdr_bytes != stp_test_hdr->us_hdr_len) {
-        file_error("[%s]data hdr  len check error, close server!!\n", __FUNCTION__);
-	    file_running("please recv data hdr again!\n");
-		return (void *)FILE_SERVER_ERROR;    
-	}
-	file_running("data hdr len check success!\n");
-
-    /*judge the TEST_HDR_T en_cmd field*/
-    if (stp_test_hdr->en_cmd == CMD_TEST_SET) {
-        i_ret = datadeal_file_set(i_connect_fd);
-		if (i_ret == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_file_set is fail, close server!!\n", __FUNCTION__);
-			close(i_connect_fd);
-			return (void *)FILE_SERVER_ERROR;
-		}
-	} else if (stp_test_hdr->en_cmd == CMD_TEST_GET) {
-        i_ret = datadeal_file_get(i_connect_fd);
-		if (i_ret == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_file_get is fail, close server!!\n", __FUNCTION__);
-			close(i_connect_fd);
-			return (void *)FILE_SERVER_ERROR;
-		}
-	} else if (stp_test_hdr->en_cmd == CMD_TEST_LIST) {
-        i_ret = datadeal_file_list(i_connect_fd);
-		if (i_ret == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_file_list is fail, close server!!\n", __FUNCTION__);
-			close(i_connect_fd);
-			return (void *)FILE_SERVER_ERROR;
-		}
-	}
-
-	file_printf("server close!\n");
-	close(i_connect_fd);
-    return (void *)FILE_SERVER_OK;
 }
 
 
@@ -187,7 +190,6 @@ int server_deal_client_request(void)
     pthread_t threadId;
 	int iRet = FILE_SERVER_OK;
 	
-
 	memset(&stClientAddr, 0, sizeof(stClientAddr));
 	iConnectFd = accept(g_iListenFd, (SA *)&stClientAddr, &clientAddrlen);
 	if (-1 == iConnectFd) {

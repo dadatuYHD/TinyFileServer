@@ -4,6 +4,8 @@
 #define FILE_CLIENT_OK              0
 #define FILE_CLIENT_ERROR          -1
 #define FILE_CLIENT_RECV_PEER_DOWN  1
+#define FILE_CLIENT_EWOULDBLOCK     2
+
 
 typedef struct sockaddr SA;
 typedef struct sockaddr_in SA_I;

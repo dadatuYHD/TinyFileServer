@@ -20,51 +20,69 @@
 #define CMD_EXIT           5
 
 
-
-/*the major state*/
-typedef enum {
-    FILESTATE_MODULE = 0,
-	FILESTATE_CMD,
-	FILESTATE_TCP_DEAL,
-	FILESTATE_EXIT,
-	FILESTATE_MAX,
-} FILE_STATE_E;
-
 typedef struct StateControl_t_ {
 	int i_curstate;
 	int (* p_curstate[])(int i_state);
 } STATE_CONTROL_ST;
 
+int file_state_tcp_init(int i_state);
 int file_state_sel_module(int i_state);
 int file_state_sel_cmd(int i_state);
 int file_state_exit(int i_state);
-int file_state_tcp_deal(int i_state);
+int file_state_data_deal(int i_state);
 void print_cmd_help(void);
 
 
 STATE_CONTROL_ST gst_file_state = {
-	FILESTATE_MODULE,
+	FILESTATE_TCP_INIT,
 	{
+	    file_state_tcp_init,
         file_state_sel_module,
 		file_state_sel_cmd,
-		file_state_tcp_deal,
+		file_state_data_deal,
 		file_state_exit,
 	},
 };
 
 void file_state_main(void)
 {
-    while (gst_file_state.i_curstate != FILESTATE_MAX)
-	{
+    while (gst_file_state.i_curstate != FILESTATE_MAX) {
 		gst_file_state.i_curstate = gst_file_state.p_curstate[gst_file_state.i_curstate](gst_file_state.i_curstate);
 	};     
+}
+
+int file_state_tcp_init(int i_state)
+{
+    if (i_state != FILESTATE_TCP_INIT) {
+        file_error("[%s]file_state_tcp_init is fail!\n", __FUNCTION__);
+		return FILESTATE_TCP_INIT;
+	}
+
+    int i_ret = FILE_CLIENT_OK;
+
+	i_ret = client_init_socket();
+	if (i_ret == FILE_CLIENT_ERROR)
+	{
+        file_error("[%s]init_socket is failed!\n", __FUNCTION__);
+		return FILE_CLIENT_ERROR;   
+	}
+
+	i_ret = client_send_request(SERVER_PORT, SERVER_IP);
+	if (i_ret == FILE_CLIENT_ERROR)
+	{
+        file_error("[%s]send_request is failed!\n", __FUNCTION__);
+		return FILE_CLIENT_ERROR;   
+	}
+
+	file_running("connect server is success!\n");
+
+	return FILESTATE_MODULE;
 }
 
 
 int file_state_sel_module(int i_state)
 {
-    if (i_state != FILESTATE_MODULE)
-    {
+    if (i_state != FILESTATE_MODULE) {
         file_error("[%s]file_state_sel_module is fail!\n", __FUNCTION__);
 		return FILESTATE_MODULE;
 	}
@@ -214,15 +232,21 @@ int file_state_sel_cmd(int i_state)
 	}
 	if (ui_cmd == CMD_EXIT)
 	{
-        return FILESTATE_EXIT;  
+        memset(&st_test_hdr, 0, sizeof(st_test_hdr));
+		st_test_hdr.en_cmd = CMD_TEST_CLIENT_EXIT;
+        i_ret = datadeal_set_hdr(&st_test_hdr, HDR_FIELD_CMD);
+		if (i_ret == FILEDATA_DEAL_RET_FAIL) {
+            file_error("[%s]datadeal_set_hdr set is fail!\n", __FUNCTION__);
+			return FILESTATE_CMD;
+		}     
 	}
 	
-    return FILESTATE_TCP_DEAL;    
+    return FILESTATE_DATA_DEAL;    
 }
 
-int file_state_tcp_deal(int i_state)
+int file_state_data_deal(int i_state)
 {
-    if (i_state != FILESTATE_TCP_DEAL)
+    if (i_state != FILESTATE_DATA_DEAL)
     {
         file_error("[%s]file_state_tcp_deal is fail!\n", __FUNCTION__);
 		return FILESTATE_CMD;
@@ -230,29 +254,17 @@ int file_state_tcp_deal(int i_state)
 
     int iRet = FILE_CLIENT_OK;
 
-	iRet = client_init_socket();
-	if (iRet == FILE_CLIENT_ERROR)
-	{
-        file_error("[%s]init_socket is failed!\n", __FUNCTION__);
-		return FILE_CLIENT_ERROR;   
-	}
-
-	iRet = client_send_request(SERVER_PORT, SERVER_IP);
-	if (iRet == FILE_CLIENT_ERROR)
-	{
-        file_error("[%s]send_request is failed!\n", __FUNCTION__);
-		return FILE_CLIENT_ERROR;   
-	}
-
-	file_running("connect server is success!\n");
-	file_running("start interaction data!\n");
-
+    file_running("start interaction data!\n");
 
     iRet = client_data_interaction();
 	if (iRet == FILE_CLIENT_ERROR)
 	{
         file_error("[%s]data_interaction is failed!\n", __FUNCTION__);
 		return FILE_CLIENT_ERROR;   
+	} else if (FILESTATE_MAX == iRet) {
+        return  FILESTATE_MAX;  
+	} else {
+            /*************/
 	}
 
 	return FILESTATE_MODULE;
@@ -265,7 +277,7 @@ int file_state_exit(int i_state)
         file_error("[%s]file_state_exit is fail!\n", __FUNCTION__);
 		return FILESTATE_CMD;
 	}
-
+ 
     file_running("client is exit!\n");
 
     return FILESTATE_MAX;

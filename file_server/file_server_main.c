@@ -21,6 +21,10 @@ int main(int argc, char *argv[])
 	while (1)
 	{
         iRet = server_deal_client_request();
+		if (iRet == FILE_SERVER_ERROR) {
+            file_error("server_deal_client_request is failed!\n");
+		    return -1;    
+		}
 	}
 
 	close(server_get_listenfd());

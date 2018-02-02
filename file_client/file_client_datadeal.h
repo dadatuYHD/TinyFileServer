@@ -36,6 +36,7 @@ typedef enum {
     CMD_TEST_SET = 0,
     CMD_TEST_GET,
     CMD_TEST_LIST,
+    CMD_TEST_CLIENT_EXIT,
     CMD_MAX,
 }CMD_E;
 
@@ -54,6 +55,8 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg);
 int datadeal_file_set(int i_connect_fd);
 int datadeal_file_get(int i_connect_fd);
 int datadeal_file_list(int i_connect_fd);
+int datadeal_file_exit(int i_connect_fd);
+
 
 
 

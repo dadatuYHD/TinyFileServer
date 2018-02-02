@@ -11,6 +11,10 @@
 #include <unistd.h>
 #include "file_client_debug.h"
 #include "file_client_datadeal.h"
+#include "file_client_state.h"
+#include <errno.h>
+
+
 
 #define CLIENT_PORT 8889 
 #define CLIENT_IP   "192.168.10.100" 
@@ -50,7 +54,6 @@ int client_init_socket(void)
 
 int client_send_request(int iPort, char *cpServerIp)
 {
-    file_trace();
     SA_I stServerAddr;
 	int iRet = FILE_CLIENT_OK;
 
@@ -105,6 +108,19 @@ int client_data_interaction(void)
 			return FILE_CLIENT_ERROR;
 		}     
 	}
+	if (st_test_hdr.en_cmd == CMD_TEST_CLIENT_EXIT)
+	{
+	    i_ret = datadeal_file_exit(g_iConnectFd);
+		if (i_ret == FILEDATA_DEAL_RET_FAIL)
+		{
+            file_error("[%s]datadeal_file_list is failed!\n", __FUNCTION__);
+			return FILE_CLIENT_ERROR;
+		} else if (FILESTATE_MAX == i_ret) {
+            return  FILESTATE_MAX;  
+		} else {
+            /*************/
+		}
+	}
 	
 	return FILE_CLIENT_OK;
 }
@@ -144,9 +160,10 @@ int client_recv_data(int i_connect_fd, void *p_buf, int i_bufsize)
         i_recv_bytes = recv(i_connect_fd, (char *)p_buf, i_bufsize - i_total_recv_bytes, 0);
 	    if (-1 == i_recv_bytes) {
             perror("recv");
-		    close(i_connect_fd);
-		    return FILE_CLIENT_ERROR;
-	    } else if (0 ==i_recv_bytes) {
+            file_error("[%s]recv is failed!\n", __FUNCTION__);
+            close(i_connect_fd);
+            return FILE_CLIENT_ERROR;    
+		} else if (0 == i_recv_bytes) {
             file_running("peer is shutdown\n");
 		    close(i_connect_fd);
 		    return FILE_CLIENT_RECV_PEER_DOWN;
