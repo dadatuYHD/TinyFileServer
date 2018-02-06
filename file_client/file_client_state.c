@@ -9,7 +9,7 @@
 
 #define BUFSIZE     1024
 #define SERVER_PORT 8888
-#define SERVER_IP   "192.168.1.159"
+#define SERVER_IP   "192.168.10.157"
 #define MODULE_PROTOBUF    1
 #define MODULE_JSON        2
 #define MODULE_TVL         3
@@ -153,8 +153,8 @@ void print_cmd_help(void)
 {
     file_running("help: 显示客户端所有命令和说明\n");
 	file_running("list: 显示服务器可下载文件列表\n");
-	file_running("get <file>: 下载文件\n");
-	file_running("set <file>: 上传文件\n");
+	file_running("get: 下载文件\n");
+	file_running("set: 上传文件\n");
 	file_running("exit: 退出客户端\n");
 }
 

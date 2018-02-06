@@ -49,12 +49,12 @@ void   file__data__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &file__data__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor file__data__field_descriptors[2] =
+static const ProtobufCFieldDescriptor file__data__field_descriptors[3] =
 {
   {
     "p_cmd_buf",
     1,
-    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(FILEDATA, p_cmd_buf),
@@ -64,12 +64,24 @@ static const ProtobufCFieldDescriptor file__data__field_descriptors[2] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "p_data_buf",
+    "p_filename_buf",
     2,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(FILEDATA, p_data_buf),
+    PROTOBUF_C_OFFSETOF(FILEDATA, p_filename_buf),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "p_filedata_buf",
+    3,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(FILEDATA, p_filedata_buf),
     NULL,
     NULL,
     0,            /* packed */
@@ -78,12 +90,13 @@ static const ProtobufCFieldDescriptor file__data__field_descriptors[2] =
 };
 static const unsigned file__data__field_indices_by_name[] = {
   0,   /* field[0] = p_cmd_buf */
-  1,   /* field[1] = p_data_buf */
+  2,   /* field[2] = p_filedata_buf */
+  1,   /* field[1] = p_filename_buf */
 };
 static const ProtobufCIntRange file__data__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor file__data__descriptor =
 {
@@ -93,7 +106,7 @@ const ProtobufCMessageDescriptor file__data__descriptor =
   "FILEDATA",
   "",
   sizeof(FILEDATA),
-  2,
+  3,
   file__data__field_descriptors,
   file__data__field_indices_by_name,
   1,  file__data__number_ranges,

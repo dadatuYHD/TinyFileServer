@@ -20,11 +20,12 @@ struct  _FILEDATA
 {
   ProtobufCMessage base;
   char *p_cmd_buf;
-  char *p_data_buf;
+  char *p_filename_buf;
+  char *p_filedata_buf;
 };
 #define FILE__DATA__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&file__data__descriptor) \
-    , NULL, NULL }
+    , NULL, NULL, NULL }
 
 
 /* FILEDATA methods */

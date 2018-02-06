@@ -8,15 +8,15 @@
 #include "Message.pb-c.h"
 #include "file_client.h"
 #include "file_client_state.h"
+#include "file_client_input.h"
 
 
 #define BUFSIZE 1024
 
 TEST_HDR_T g_st_test_hdr;    //全局数据头部
 
-int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf);
-
-
+int datadeal_proto_pack(FILEDATA *cp_unpack_buf, char **cp_pack_buf);
+int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *cp_unpack_buf);
 
 /************************************************************
 FUNCTION:datadeal_get_hdr()
@@ -60,10 +60,82 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 	return FILEDATA_DEAL_RET_OK;
 }
 
+/************************************************************
+FUNCTION:datadeal_file_set()
+Description:该函数主要用来获取服务器保存的文件
+Arguments:
+[i_connect_fd][IN]：已经建立好连接的文件描述符
+return:返回g_st_test_hdr
+************************************************************/
 int datadeal_file_set(int i_connect_fd)
 {
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+	FILEDATA st_unpack_buf;
+	char *cp_pack_buf = NULL;
+	int i_pack_len = 0;
+	int i_ret = FILE_CLIENT_OK;
+	int i_send_bytes = 0;
+	char c_filename_buf_a[BUFSIZE];
 
+    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+		memset(&st_unpack_buf, 0, BUFSIZE);
+		st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
+		st_unpack_buf.p_filename_buf = (char *)malloc(BUFSIZE);
+		st_unpack_buf.p_filedata_buf = NULL;
+        strncpy(st_unpack_buf.p_cmd_buf, "S", 1);
+		st_unpack_buf.p_cmd_buf[1] = '\0';	
+
+		file_running("Please input file name:\n");
+		i_ret = file_input_string(st_unpack_buf.p_filename_buf);
+		if (i_ret == FILEINPUT_RET_FAIL) {
+            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;    
+		}
+
+		i_pack_len = datadeal_proto_pack(&st_unpack_buf, &cp_pack_buf);
+		if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
+            file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+        if (NULL != st_unpack_buf.p_cmd_buf) {
+            free(st_unpack_buf.p_cmd_buf);
+		} 
+		if (NULL != st_unpack_buf.p_filename_buf) {
+            free(st_unpack_buf.p_filename_buf);   
+		}
+		if (NULL != st_unpack_buf.p_filedata_buf) {
+            free(st_unpack_buf.p_filedata_buf);   
+		}
+
+		/*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = i_pack_len;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the pack data of cmd filename and file content */
+        i_send_bytes = client_send_data(i_connect_fd, cp_pack_buf, i_pack_len);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
+		file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
+		file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", cp_pack_buf[i]);
+		}
+		
+        if (NULL != cp_pack_buf) {
+            free(cp_pack_buf);
+		}	
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
 
@@ -82,18 +154,7 @@ return:返回g_st_test_hdr
 ************************************************************/
 int datadeal_file_get(int i_connect_fd)
 {
-    char c_unpack_buf_a[BUFSIZE];
-	char *c_pack_buf_a = NULL;
-	int i_pack_len = 0;
-	int i_ret = FILE_CLIENT_OK;
-	int i_send_bytes = 0;
-	char c_filename_buf_a[BUFSIZE];
-
     if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
-        memset(c_unpack_buf_a, 0, sizeof(c_unpack_buf_a));
-        strncpy(c_unpack_buf_a, "G", 1);
-		c_unpack_buf_a[1] = '\0';
-
 		
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
@@ -113,9 +174,9 @@ return:返回g_st_test_hdr
 ************************************************************/
 int datadeal_file_list(int i_connect_fd)
 {
-#if 0
-    char c_unpack_buf_a[BUFSIZE];
-	char *c_pack_buf_a = NULL;
+#if 1
+    FILEDATA st_unpack_buf;
+	char *cp_pack_buf = NULL;
 	int i_pack_len = 0;
 #endif
 	int i_ret = FILE_CLIENT_OK;
@@ -123,20 +184,33 @@ int datadeal_file_list(int i_connect_fd)
 	char c_filename_buf_a[BUFSIZE];
 
     if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
-#if 0
-        memset(c_unpack_buf_a, 0, sizeof(c_unpack_buf_a));
-        strncpy(c_unpack_buf_a, "L", 1);
-		c_unpack_buf_a[1] = '\0';
+#if 1
+        memset(&st_unpack_buf, 0, BUFSIZE);
+        st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
+		st_unpack_buf.p_filename_buf = NULL;
+		st_unpack_buf.p_filedata_buf = NULL;
+        strncpy(st_unpack_buf.p_cmd_buf, "L", 1);
+		st_unpack_buf.p_cmd_buf[1] = '\0';	
 		
-		i_pack_len = datadeal_proto_pack(c_unpack_buf_a, &c_pack_buf_a);
+		i_pack_len = datadeal_proto_pack(&st_unpack_buf, &cp_pack_buf);
 		if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
             file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
 			return FILEDATA_DEAL_RET_FAIL;
 		}
+
+        if (NULL != st_unpack_buf.p_cmd_buf) {
+            free(st_unpack_buf.p_cmd_buf);
+		} 
+		if (NULL != st_unpack_buf.p_filename_buf) {
+            free(st_unpack_buf.p_filename_buf);   
+		}
+		if (NULL != st_unpack_buf.p_filedata_buf) {
+            free(st_unpack_buf.p_filedata_buf);   
+		}
 #endif
         /*pading the g_st_test_hdr structure*/
 		g_st_test_hdr.en_version = VERSION_ONE;
-		g_st_test_hdr.ui_dat_len = 0;
+		g_st_test_hdr.ui_dat_len = i_pack_len;
 		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
 
 		/*sned the g_st_test_hdr*/
@@ -146,20 +220,24 @@ int datadeal_file_list(int i_connect_fd)
 			return FILEDATA_DEAL_RET_FAIL;
 		}
 		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
-#if 0
+#if 1
 		/*sned the cmd pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, i_pack_len);
+        i_send_bytes = client_send_data(i_connect_fd, cp_pack_buf, i_pack_len);
 		if (i_send_bytes == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
 			return FILEDATA_DEAL_RET_FAIL;
 		}
 		file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
-		file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
+		file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
 		file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
         for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", c_pack_buf_a[i]);
+            file_printf("%hhX\n", cp_pack_buf[i]);
 		}
 #endif
+        if (NULL != cp_pack_buf) {
+            free(cp_pack_buf);
+		}
+
         /*recv file description from server*/
         file_running("server file as follow:\n");
 		while (1) {    
@@ -207,10 +285,17 @@ int datadeal_file_exit(int i_connect_fd)
 	return FILESTATE_MAX;
 }
 
-
-int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf)
+/************************************************************
+FUNCTION:datadeal_proto_pack()
+Description:以protobuf协议编码数据
+Arguments:
+[stp_unpack_buf][IN]：指向存放原始数据的内存
+[cp_pack_buf][OUT]：保存打包完成的数据
+return:返回打包之后数据的大小
+************************************************************/
+int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 {
-    assert(NULL != cp_unpack_buf);
+    assert(NULL != stp_unpack_buf);
 	assert(NULL != cp_pack_buf);
 
 	FILEDATA st_unpack_data;
@@ -220,15 +305,41 @@ int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf)
     file__data__init(&st_unpack_data);
 
 	/*padding data*/
-	st_unpack_data.p_cmd_buf = (char *)malloc(BUFSIZE);
-	if (NULL == st_unpack_data.p_cmd_buf)
-	{
-        file_error("[%s]malloc is error!\n", __FUNCTION__);
-	    return FILEDATA_DEAL_RET_FAIL;
+	if (NULL != stp_unpack_buf->p_cmd_buf)
+	{    
+	    st_unpack_data.p_cmd_buf = (char *)malloc(BUFSIZE);
+		if (NULL == st_unpack_data.p_cmd_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;  
+		} 
+		strncpy(st_unpack_data.p_cmd_buf, stp_unpack_buf->p_cmd_buf, BUFSIZE);  
+	} else {
+        st_unpack_data.p_cmd_buf = NULL;
 	}
-	strncpy(st_unpack_data.p_cmd_buf, cp_unpack_buf, BUFSIZE);
-	st_unpack_data.p_data_buf = NULL;
+	
+	if (NULL != stp_unpack_buf->p_filename_buf) {
+	    st_unpack_data.p_filename_buf = (char *)malloc(BUFSIZE);
+		if (NULL == st_unpack_data.p_filename_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;  
+		} 
+        strncpy(st_unpack_data.p_filename_buf, stp_unpack_buf->p_filename_buf, BUFSIZE);    
+	} else {
+        st_unpack_data.p_filename_buf = NULL;
+	}
 
+	if (NULL != stp_unpack_buf->p_filedata_buf) {
+	    st_unpack_data.p_filedata_buf = (char *)malloc(BUFSIZE);
+		if (NULL == st_unpack_data.p_filedata_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;  
+		} 
+        strncpy(st_unpack_data.p_filedata_buf, stp_unpack_buf->p_filedata_buf, BUFSIZE);    
+	} else {
+        st_unpack_data.p_filedata_buf = NULL;
+	}
+
+    /*get size of pack data*/
 	filedata_len = file__data__get_packed_size(&st_unpack_data);
 
 	*cp_pack_buf = (char *)malloc(filedata_len);
@@ -240,10 +351,72 @@ int datadeal_proto_pack(char *cp_unpack_buf, char **cp_pack_buf)
 
 	file__data__pack(&st_unpack_data, *cp_pack_buf);
 
-	free(st_unpack_data.p_cmd_buf);
-
+    if (NULL != st_unpack_data.p_cmd_buf) {
+        free(st_unpack_data.p_cmd_buf);    
+	}
+	if (NULL != st_unpack_data.p_filename_buf) {
+        free(st_unpack_data.p_filename_buf);     
+	}
+	if (NULL != st_unpack_data.p_filedata_buf) {
+        free(st_unpack_data.p_filedata_buf);     
+	}
+	
 	return filedata_len;
 }
+
+/************************************************************
+FUNCTION:datadeal_proto_unpack()
+Description:以protobuf协议解码数据
+Arguments:
+[cp_pack_buf][IN]：待解包的数据
+[stp_unpack_buf][OUT]:存放解包之后的数据
+return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+************************************************************/
+int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf)
+{
+    assert(NULL != cp_pack_buf);  
+	assert(NULL != stp_unpack_buf);
+
+	FILEDATA *st_unpack_data = NULL;
+
+	st_unpack_data = file__data__unpack(NULL, g_st_test_hdr.ui_dat_len, cp_pack_buf);
+    if (NULL == st_unpack_data) {
+        file_error("[%s]file__data__unpack is error!\n", __FUNCTION__);
+	    return FILEDATA_DEAL_RET_FAIL;    
+	}
+  
+    if (NULL != st_unpack_data->p_cmd_buf) {
+        stp_unpack_buf->p_cmd_buf = (char *)malloc(g_st_test_hdr.ui_dat_len + 1);
+        if (NULL == stp_unpack_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+            return FILEDATA_DEAL_RET_FAIL;    
+        }
+        strcpy(stp_unpack_buf->p_cmd_buf, st_unpack_data->p_cmd_buf);    
+	}
+
+	if (NULL != st_unpack_data->p_filename_buf) {
+        stp_unpack_buf->p_filename_buf = (char *)malloc(g_st_test_hdr.ui_dat_len + 1);
+        if (NULL == stp_unpack_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+            return FILEDATA_DEAL_RET_FAIL;    
+        }
+        strcpy(stp_unpack_buf->p_filename_buf, st_unpack_data->p_filename_buf);    
+	}
+
+	if (NULL != st_unpack_data->p_filedata_buf) {
+        stp_unpack_buf->p_filedata_buf = (char *)malloc(g_st_test_hdr.ui_dat_len + 1);
+        if (NULL == stp_unpack_buf) {
+            file_error("[%s]malloc is error!\n", __FUNCTION__);
+            return FILEDATA_DEAL_RET_FAIL;    
+        }
+        strcpy(stp_unpack_buf->p_filedata_buf, st_unpack_data->p_filedata_buf);    
+	}
+
+	file__data__free_unpacked(st_unpack_data,NULL);
+
+	return FILEDATA_DEAL_RET_OK;
+}
+
 
 
 

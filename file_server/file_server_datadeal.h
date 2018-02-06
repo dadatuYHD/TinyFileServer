@@ -55,7 +55,6 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg);
 int datadeal_file_get(int i_connect_fd);
 int datadeal_file_set(int i_connect_fd);
 int datadeal_file_list(int i_connect_fd);
-int datadeal_proto_unpack(char *cp_pack_buf, char **cp_unpack_buf);
 TEST_HDR_T * datadeal_get_phdr(void);
 
 
