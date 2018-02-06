@@ -366,7 +366,7 @@ int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 
 /************************************************************
 FUNCTION:datadeal_proto_unpack()
-Description:以protobuf协议解码数据
+Description:protobuf协议解码
 Arguments:
 [cp_pack_buf][IN]：待解包的数据
 [stp_unpack_buf][OUT]:存放解包之后的数据
