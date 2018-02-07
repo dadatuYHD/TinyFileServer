@@ -22,10 +22,12 @@ struct  _FILEDATA
   char *p_cmd_buf;
   char *p_filename_buf;
   char *p_filedata_buf;
+  protobuf_c_boolean has_i_file_size;
+  uint32_t i_file_size;
 };
 #define FILE__DATA__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&file__data__descriptor) \
-    , NULL, NULL, NULL }
+    , NULL, NULL, NULL, 0,0 }
 
 
 /* FILEDATA methods */

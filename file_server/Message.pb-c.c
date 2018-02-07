@@ -49,7 +49,7 @@ void   file__data__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &file__data__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor file__data__field_descriptors[3] =
+static const ProtobufCFieldDescriptor file__data__field_descriptors[4] =
 {
   {
     "p_cmd_buf",
@@ -87,8 +87,21 @@ static const ProtobufCFieldDescriptor file__data__field_descriptors[3] =
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "i_file_size",
+    4,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    PROTOBUF_C_OFFSETOF(FILEDATA, has_i_file_size),
+    PROTOBUF_C_OFFSETOF(FILEDATA, i_file_size),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned file__data__field_indices_by_name[] = {
+  3,   /* field[3] = i_file_size */
   0,   /* field[0] = p_cmd_buf */
   2,   /* field[2] = p_filedata_buf */
   1,   /* field[1] = p_filename_buf */
@@ -96,7 +109,7 @@ static const unsigned file__data__field_indices_by_name[] = {
 static const ProtobufCIntRange file__data__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 4 }
 };
 const ProtobufCMessageDescriptor file__data__descriptor =
 {
@@ -106,7 +119,7 @@ const ProtobufCMessageDescriptor file__data__descriptor =
   "FILEDATA",
   "",
   sizeof(FILEDATA),
-  3,
+  4,
   file__data__field_descriptors,
   file__data__field_indices_by_name,
   1,  file__data__number_ranges,

@@ -51,6 +51,7 @@ typedef struct test_hdr_s {
 
 /*头部处理函数声名*/
 TEST_HDR_T datadeal_get_hdr(void);
+TEST_HDR_T * datadeal_get_phdr(void);
 int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg);
 int datadeal_file_set(int i_connect_fd);
 int datadeal_file_get(int i_connect_fd);

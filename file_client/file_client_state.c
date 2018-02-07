@@ -9,7 +9,7 @@
 
 #define BUFSIZE     1024
 #define SERVER_PORT 8888
-#define SERVER_IP   "192.168.10.157"
+#define SERVER_IP   "192.168.20.159"
 #define MODULE_PROTOBUF    1
 #define MODULE_JSON        2
 #define MODULE_TVL         3
@@ -90,7 +90,13 @@ int file_state_sel_module(int i_state)
 	unsigned int ui_module = 0;
 	int i_ret = FILEINPUT_RET_OK;
 	TEST_HDR_T st_test_hdr;
+	TEST_HDR_T * stp_test_hdr = NULL;
 
+    /*init the g_st_test_hdr structure*/
+	stp_test_hdr = datadeal_get_phdr();
+	memset(stp_test_hdr, 0, sizeof(TEST_HDR_T));
+
+    /*read the module number*/
     file_running("please select module by number:1.PROTOBUF 2.JSON 3.TLV\n");
 	i_ret = file_input_int(&ui_module);
 	if (i_ret == FILEINPUT_RET_INPUT_INVALID)

@@ -3,4 +3,5 @@ message FILE_DATA
     optional string p_cmd_buf  = 1;
     optional string p_filename_buf = 2;
     optional string p_filedata_buf = 3;
+	optional uint32 i_file_size    = 4;
 }
