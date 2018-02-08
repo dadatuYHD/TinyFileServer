@@ -9,7 +9,7 @@
 
 #define BUFSIZE     1024
 #define SERVER_PORT 8888
-#define SERVER_IP   "192.168.20.159"
+#define SERVER_IP   "192.168.1.159"
 #define MODULE_PROTOBUF    1
 #define MODULE_JSON        2
 #define MODULE_TVL         3

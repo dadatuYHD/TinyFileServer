@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-    file_printf("Tcp Server is listen port 8888:\n");
+    file_running("Tcp Server is listen port 8888:\n");
 
 	while (1)
 	{
