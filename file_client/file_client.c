@@ -125,7 +125,15 @@ int client_data_interaction(void)
 	return FILE_CLIENT_OK;
 }
 
-
+/************************************************************
+FUNCTION:client_send_data
+Description:by socket file descriptor send data
+Arguments:
+[i_connect_fd][IN]：file descriptor
+[p_buf][IN]：Store data to be send
+[p_buf][IN]：size of to be send
+return:success return bytes of send，fail return FILE_CLIENT_ERROR
+************************************************************/
 int client_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
 {
     assert(NULL != p_buf);
@@ -148,6 +156,15 @@ int client_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
 	return i_total_send_bytes;
 }
 
+/************************************************************
+FUNCTION:client_recv_data
+Description:by socket file descriptor recv data
+Arguments:
+[i_connect_fd][IN]：file descriptor
+[p_buf][IN]：Store data to be recv
+[p_buf][IN]：size of to be recv
+return:success return bytes of recv，fail return FILE_CLIENT_ERROR
+************************************************************/
 int client_recv_data(int i_connect_fd, void *p_buf, int i_bufsize)
 {
     assert(NULL != p_buf);

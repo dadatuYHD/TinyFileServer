@@ -23,8 +23,6 @@ int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_siz
 int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes);
 int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes);
 
-
-
 /************************************************************
 FUNCTION:datadeal_get_hdr()
 Description:该函数主要用来文件间传递g_st_test_hdr全局变量
@@ -602,12 +600,12 @@ int datadeal_file_exit(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_proto_pack()
-Description:以protobuf协议编码数据
+FUNCTION:datadeal_proto_pack
+Description:pack data by use protobuf
 Arguments:
-[stp_unpack_buf][IN]：指向存放原始数据的内存
-[cp_pack_buf][OUT]：保存打包完成的数据
-return:返回打包之后数据的大小
+[stp_unpack_buf][IN]：store origin data
+[cp_pack_buf][OUT]：store data be packed
+return:success return the size of pack data, fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 {
