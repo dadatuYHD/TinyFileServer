@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cjson/cJSON.h>
+
 
 #define BUFSIZE 1024
 
@@ -140,17 +142,17 @@ return:返回g_st_test_hdr
 ************************************************************/
 int datadeal_file_set(int i_connect_fd)
 {
-	FILEDATA st_unpack_buf;
-	char *cp_pack_buf = NULL;
-	int i_pack_len = 0;
 	int i_ret = FILE_CLIENT_OK;
 	int i_send_bytes = 0;
-	char c_filename_buf_a[BUFSIZE];
 	int i_file_fd = 0;
 	struct stat st_file_info;
 	ssize_t sst_read_bytes = 0;
-
+		
     if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+		FILEDATA st_unpack_buf;
+		char *cp_pack_buf = NULL;
+		int i_pack_len = 0;	
+
 		memset(&st_unpack_buf, 0, BUFSIZE);
 		st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
 	    if (NULL == st_unpack_buf.p_cmd_buf) {
@@ -265,6 +267,112 @@ int datadeal_file_set(int i_connect_fd)
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
 
+	    cJSON *stp_cjson_root = cJSON_CreateObject();
+        char *cp_cjson_data_out = NULL;
+	    int i_cjson_data_size = 0;
+		char c_filename_buf_a[BUFSIZE];
+		char *cp_file_data = NULL;
+
+		/*read the filename*/
+		file_running("Please input file name:\n");
+		memset(&c_filename_buf_a, 0, BUFSIZE);
+		i_ret = file_input_string(c_filename_buf_a);
+		if (i_ret == FILEINPUT_RET_FAIL) {
+            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;    
+		}
+
+		/*open the file*/
+		i_file_fd = open(c_filename_buf_a, O_RDONLY);
+		if (-1 == i_file_fd) {
+            perror("open");
+			file_error("[%s]open is fail!\n", __FUNCTION__);
+		    return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+		/*Get the size of file*/
+		memset(&st_file_info, 0, sizeof(st_file_info));
+		i_ret = stat(c_filename_buf_a, &st_file_info);
+		if (-1 == i_ret) {
+            perror("stat");
+			file_error("[%s]stat is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+        /*read the file to cp_file_data*/
+		cp_file_data = (char *)malloc(st_file_info.st_size);
+		if (NULL == cp_file_data) {
+            perror("malloc");
+			file_error("[%s]malloc is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+		sst_read_bytes = datadeal_file_read(i_file_fd, cp_file_data, st_file_info.st_size);
+        if (-1 == sst_read_bytes) {
+            file_error("[%s]datadeal_file_read is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;     
+		}
+
+        /*read file size check*/
+        if (sst_read_bytes != st_file_info.st_size) {
+			file_running("file read is fail!\n");	
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+        /*add the "S" cmd to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "S");
+		/*add the filename to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_file_name", c_filename_buf_a);
+		/*add the file content data to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_file_data", cp_file_data);
+		/*add the file size to the json structure*/
+		cJSON_AddNumberToObject(stp_cjson_root, "number_file_size", st_file_info.st_size);
+		
+		/*output the json data to char*/
+		cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+		
+		/*judge the data size of bytes*/
+		i_cjson_data_size = strlen(cp_cjson_data_out);
+
+	    /*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the cjson pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
+		file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
+		file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", cp_cjson_data_out[i]);
+		}
+
+		if (NULL != stp_cjson_root) {
+            cJSON_Delete(stp_cjson_root);
+			stp_cjson_root = NULL;
+		}
+		if (NULL != cp_cjson_data_out) {
+            free(cp_cjson_data_out);
+			cp_cjson_data_out = NULL;
+		}
+	    if (NULL != cp_file_data) {
+            free(cp_file_data);
+			cp_file_data = NULL;
+		}  
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
 
@@ -280,18 +388,19 @@ return:返回g_st_test_hdr
 ************************************************************/
 int datadeal_file_get(int i_connect_fd)
 {
-    FILEDATA st_unpack_buf;
-	char *cp_pack_buf = NULL;
-	int i_pack_len = 0;
-	int i_ret = FILE_CLIENT_OK;
-	int i_send_bytes = 0;
-	char c_filename_buf_a[BUFSIZE];
-	int i_recv_data_bytes = 0;
-	int i_file_fd = 0;
-	TEST_HDR_T st_test_hdr;  
-	ssize_t sst_write_bytes = 0;
+    int i_ret = FILE_CLIENT_OK;
+    int i_send_bytes = 0;
+    int i_recv_data_bytes = 0;
+    int i_file_fd = 0;
+    TEST_HDR_T st_test_hdr;  
+    ssize_t sst_write_bytes = 0;
 
     if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+		
+        FILEDATA st_unpack_buf;
+        char *cp_pack_buf = NULL;
+        int i_pack_len = 0;
+
 	    memset(&st_unpack_buf, 0, BUFSIZE);
         st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
 		if (NULL == st_unpack_buf.p_cmd_buf) {
@@ -474,6 +583,174 @@ int datadeal_file_get(int i_connect_fd)
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
 
+	    cJSON *stp_cjson_root = cJSON_CreateObject();
+        char *cp_cjson_data_out = NULL;
+	    int i_cjson_data_size = 0;
+		char c_filename_buf_a[BUFSIZE];
+		char *cp_file_data = NULL; 
+
+		/*read the filename*/
+		file_running("Please input file name:\n");
+		memset(&c_filename_buf_a, 0, BUFSIZE);
+		i_ret = file_input_string(c_filename_buf_a);
+		if (i_ret == FILEINPUT_RET_FAIL) {
+            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;    
+		}
+
+		/*add the "G" cmd to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "G");
+		/*add the filename to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_file_name", c_filename_buf_a);
+		
+		/*output the json data to char*/
+		cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+		
+		/*judge the data size of bytes*/
+		i_cjson_data_size = strlen(cp_cjson_data_out);
+
+		/*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the cjson pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
+		file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
+		file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", cp_cjson_data_out[i]);
+		}
+
+		cJSON_Delete(stp_cjson_root);
+		if (NULL != cp_cjson_data_out) {
+            free(cp_cjson_data_out);
+			cp_cjson_data_out = NULL;
+		}
+
+		/*recv file content size of hdr*/
+		memset(&st_test_hdr, 0, sizeof(st_test_hdr));
+		i_recv_data_bytes = client_recv_data(i_connect_fd, &st_test_hdr, sizeof(st_test_hdr)); 
+	    if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+		    close(i_connect_fd);
+		    return FILEDATA_DEAL_RET_FAIL;
+	    } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+	    } else {
+            file_running("recv server hdr is success!\n");
+			file_printf("client_recv_data recv hdr data %d bytes\n", i_recv_data_bytes);
+        } 
+
+        cJSON * stp_json = NULL; 
+		cJSON * stp_json_str_filename = NULL; 
+		cJSON * stp_json_str_filedata = NULL; 
+		cJSON * stp_json_num_filesize = NULL; 
+
+		/*recv pack file content data from sever*/
+		cp_cjson_data_out = (char *)malloc(st_test_hdr.ui_dat_len);
+		if (NULL == cp_cjson_data_out) {
+            perror("malloc");
+			file_error("[%s]malloc is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 		
+		}
+        i_recv_data_bytes = client_recv_data(i_connect_fd, (char *)cp_cjson_data_out, st_test_hdr.ui_dat_len); 
+	    if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+		    return FILEDATA_DEAL_RET_FAIL;
+	    } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+	    } else {
+			/*check having read file size */
+            if (i_recv_data_bytes != st_test_hdr.ui_dat_len) {
+			    file_running("file size is checking fail!\n");	
+			    return FILEDATA_DEAL_RET_FAIL; 
+		    }
+            file_running("recv server file content of cjsont pack data is success!\n");
+			file_printf("client_recv_data recv cjosn pack data %d bytes\n", i_recv_data_bytes);
+        }
+
+		/*Parse the json data*/
+		stp_json = cJSON_Parse(cp_cjson_data_out);
+		if (NULL == stp_json) {
+            file_error("[%s]cJSON_Parse is error, close server!!\n", __FUNCTION__);  
+			 return FILEDATA_DEAL_RET_FAIL;  
+		}
+
+		/*get the item that the key name is string_file_data*/
+		stp_json_str_filedata = cJSON_GetObjectItem(stp_json, "string_file_data");
+		if (cJSON_IsString(stp_json_str_filedata)) {
+            if (!strncmp(stp_json_str_filedata->string, "string_file_data", 16)) {
+                file_running("[%s]json string_file_data check is success!\n", __FUNCTION__);    
+			} else {
+                file_running("[%s]json string_file_data check is fail!\n", __FUNCTION__); 
+				return FILEDATA_DEAL_RET_FAIL; 
+			} 
+		}
+
+		/*get the item that the key name is number_file_size*/
+		stp_json_num_filesize = cJSON_GetObjectItem(stp_json, "number_file_size");
+		if (cJSON_IsNumber(stp_json_num_filesize)) {
+            if (!strncmp(stp_json_num_filesize->string, "number_file_size", 16)) {
+                file_running("[%s]json number_file_size check is success!\n", __FUNCTION__);    
+			} else {
+                file_running("[%s]json number_file_size check is fail!\n", __FUNCTION__); 
+				return FILEDATA_DEAL_RET_FAIL; 
+			} 
+		}
+
+		/*open the file*/
+		while (1) {
+          	i_file_fd = open(c_filename_buf_a, O_WRONLY|O_CREAT|O_EXCL);
+          	if (-1 == i_file_fd) {
+          		if (errno == EEXIST) {
+					i_ret = remove(c_filename_buf_a);
+					if (-1 == i_ret) {
+                        perror("remove");
+						file_error("[%s]remove is error!\n", __FUNCTION__);
+						return 0;
+					}
+                    continue;
+          	    } else {
+                    perror("open");
+            		file_error("[%s]open is fail!\n", __FUNCTION__);
+            	    return FILEDATA_DEAL_RET_FAIL;     
+				}
+          	} else {
+                break;
+			}   
+		}
+
+		/*write data to filename*/
+		
+        sst_write_bytes = datadeal_file_write(i_file_fd, stp_json_str_filedata->valuestring, stp_json_num_filesize->valueint);
+        if (-1 == sst_write_bytes) {
+            file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+    		return FILEDATA_DEAL_RET_FAIL;     
+    	}	
+
+		close(i_file_fd);
+		if (NULL != cp_cjson_data_out) {
+            free(cp_cjson_data_out);
+			cp_cjson_data_out = NULL;
+		}
+		if (NULL != stp_json) {
+            cJSON_Delete(stp_json);
+			stp_json = NULL;
+		}
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
 
@@ -488,15 +765,16 @@ Arguments:
 return:返回g_st_test_hdr
 ************************************************************/
 int datadeal_file_list(int i_connect_fd)
-{
-    FILEDATA st_unpack_buf;
-	char *cp_pack_buf = NULL;
-	int i_pack_len = 0;
-	int i_ret = FILE_CLIENT_OK;
-	int i_send_bytes = 0;
+{  
+    int i_ret = FILE_CLIENT_OK;
+    int i_send_bytes = 0;
 	char c_filename_buf_a[BUFSIZE];
 
     if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+        FILEDATA st_unpack_buf;
+        char *cp_pack_buf = NULL;
+		int i_pack_len = 0;
+	
         memset(&st_unpack_buf, 0, BUFSIZE);
         st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
 		st_unpack_buf.p_filename_buf = NULL;
@@ -571,7 +849,67 @@ int datadeal_file_list(int i_connect_fd)
 		}
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+		
+        cJSON *stp_cjson_root = cJSON_CreateObject();
+        char *cp_cjson_data_out = NULL;
+	    int i_cjson_data_size = 0;
 
+        /*pack the "L" cmd to the json structure*/
+		cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "L");
+		
+		/*output the json data to char*/
+		cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+		
+		/*judge the data size of bytes*/
+		i_cjson_data_size = strlen(cp_cjson_data_out);
+
+	    /*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the cmd cjson pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
+		file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
+		file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", cp_cjson_data_out[i]);
+		}
+
+		cJSON_Delete(stp_cjson_root);
+	    free(cp_cjson_data_out);
+
+		/*recv file description from server*/
+        file_running("server file as follow:\n");
+		while (1) {    
+			memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
+			i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
+            if (i_ret == FILE_CLIENT_ERROR) {
+                file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
+				return FILEDATA_DEAL_RET_OK;
+			}
+            
+            if (strncmp(c_filename_buf_a, "end", 3) == 0) {
+                file_printf("recv filename data complete!\n");
+				break;
+			}
+			
+            file_running("%s\n", c_filename_buf_a);		
+		}
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
 
