@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cjson/cJSON.h>
+#include "file_client_tlv.h"
 
 
 #define BUFSIZE 1024
