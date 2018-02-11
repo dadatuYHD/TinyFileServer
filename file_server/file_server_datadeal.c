@@ -17,9 +17,6 @@
 #include "file_server_tlv.h"
 
 
-
-
-
 #define BUFSIZE 1024
 
 TEST_HDR_T g_st_test_hdr;    //全局数据头部
