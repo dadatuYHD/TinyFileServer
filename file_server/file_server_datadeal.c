@@ -305,7 +305,6 @@ int datadeal_file_list(int i_connect_fd)
         i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
 	    if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
-		    close(i_connect_fd);
 		    return FILEDATA_DEAL_RET_FAIL;
 	    } else if (i_recv_data_bytes == FILE_SERVER_RECV_PEER_DOWN) {
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
@@ -575,7 +574,6 @@ int datadeal_file_get(int i_connect_fd)
         i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
 	    if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
-		    close(i_connect_fd);
 		    return FILEDATA_DEAL_RET_FAIL;
 	    } else if (i_recv_data_bytes == FILE_SERVER_RECV_PEER_DOWN) {
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
@@ -714,7 +712,6 @@ int datadeal_file_get(int i_connect_fd)
         i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_st_test_hdr.ui_dat_len); 
 	    if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
-		    close(i_connect_fd);
 		    return FILEDATA_DEAL_RET_FAIL;
 	    } else if (i_recv_data_bytes == FILE_SERVER_RECV_PEER_DOWN) {
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
@@ -1026,7 +1023,6 @@ int datadeal_file_set(int i_connect_fd)
         i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
 	    if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
-		    close(i_connect_fd);
 		    return FILEDATA_DEAL_RET_FAIL;
 	    } else if (i_recv_data_bytes == FILE_SERVER_RECV_PEER_DOWN) {
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
