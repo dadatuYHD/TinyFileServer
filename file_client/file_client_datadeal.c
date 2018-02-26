@@ -376,7 +376,103 @@ int datadeal_file_set(int i_connect_fd)
 		}  
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+		
+		FILE_DATA_ST st_file_data;
+		char c_pack_buf_a[BUFSIZE];
+	    unsigned int ui_tlv_totol_len = 0; 
+		int i_ret = TLV_ENCODE_RET_OK;
 
+		/*read the filename*/
+		file_running("Please input file name:\n");
+		memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
+		i_ret = file_input_string(st_file_data.c_file_name);
+		if (i_ret == FILEINPUT_RET_FAIL) {
+            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;    
+		}
+
+		/*open the file*/
+		i_file_fd = open(st_file_data.c_file_name, O_RDONLY);
+		if (-1 == i_file_fd) {
+            perror("open");
+			file_error("[%s]open is fail!\n", __FUNCTION__);
+		    return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+		/*Get the size of file*/
+		memset(&st_file_info, 0, sizeof(st_file_info));
+		i_ret = stat(st_file_data.c_file_name, &st_file_info);
+		if (-1 == i_ret) {
+            perror("stat");
+			file_error("[%s]stat is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+        /*read the file to cp_file_data*/
+		st_file_data.cp_file_content = (char *)malloc(st_file_info.st_size + 1);
+		if (NULL == st_file_data.cp_file_content) {
+            perror("malloc");
+			file_error("[%s]malloc is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+		sst_read_bytes = datadeal_file_read(i_file_fd, st_file_data.cp_file_content, st_file_info.st_size);
+        if (-1 == sst_read_bytes) {
+            file_error("[%s]datadeal_file_read is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;     
+		}
+
+        /*read file size check*/
+        if (sst_read_bytes != st_file_info.st_size) {
+			file_running("file read is fail!\n");	
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+
+		/*pading the FILE_DATA_ST structure*/
+	    strcpy(st_file_data.c_file_cmd, "S");
+	    st_file_data.c_file_cmd[1] = '\0';
+		st_file_data.ui_file_size = st_file_info.st_size;
+		st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+
+		/*tlv encode the st_file_data*/
+		i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
+		if (TLV_ENCODE_RET_FAIL == i_ret) {
+            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+	    /*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the tlv pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
+		file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
+		file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", c_pack_buf_a[i]);
+		}
+
+		if (NULL != st_file_data.cp_file_content) {
+            free(st_file_data.cp_file_content);
+		    st_file_data.cp_file_content = NULL;
+		}
+		close(i_file_fd);
 	}    
 }
 
@@ -566,6 +662,7 @@ int datadeal_file_get(int i_connect_fd)
         		return FILEDATA_DEAL_RET_FAIL;     
         	}	    
 		}
+		file_running("file write is success!\n");
 
 		if (NULL != st_unpack_buf.p_cmd_buf) {
             free(st_unpack_buf.p_cmd_buf);
@@ -735,13 +832,13 @@ int datadeal_file_get(int i_connect_fd)
 			}   
 		}
 
-		/*write data to filename*/
-		
+		/*write data to filename*/		
         sst_write_bytes = datadeal_file_write(i_file_fd, stp_json_str_filedata->valuestring, stp_json_num_filesize->valueint);
         if (-1 == sst_write_bytes) {
             file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
     		return FILEDATA_DEAL_RET_FAIL;     
     	}	
+		file_running("file write is success!\n");
 
 		close(i_file_fd);
 		if (NULL != cp_cjson_data_out) {
@@ -754,7 +851,142 @@ int datadeal_file_get(int i_connect_fd)
 		}
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+		
+        FILE_DATA_ST st_file_data;
+		char c_pack_buf_a[BUFSIZE];
+	    unsigned int ui_tlv_totol_len = 0; 
+		int i_ret = TLV_ENCODE_RET_OK;
 
+		/*read the filename*/
+		file_running("Please input file name:\n");
+		memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
+		i_ret = file_input_string(st_file_data.c_file_name);
+		if (i_ret == FILEINPUT_RET_FAIL) {
+            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;    
+		}
+
+		/*pading the FILE_DATA_ST structure*/
+	    strcpy(st_file_data.c_file_cmd, "G");
+	    st_file_data.c_file_cmd[1] = '\0';
+		st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+
+		/*tlv encode the st_file_data*/
+		memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
+		i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
+		if (TLV_ENCODE_RET_FAIL == i_ret) {
+            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+	    /*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the tlv pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
+		file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
+		file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", c_pack_buf_a[i]);
+		}
+
+		/*recv file content size of hdr*/
+		memset(&st_test_hdr, 0, sizeof(st_test_hdr));
+		i_recv_data_bytes = client_recv_data(i_connect_fd, &st_test_hdr, sizeof(st_test_hdr)); 
+	    if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+		    close(i_connect_fd);
+		    return FILEDATA_DEAL_RET_FAIL;
+	    } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+	    } else {
+            file_running("recv server hdr is success!\n");
+			file_printf("client_recv_data recv hdr data %d bytes\n", i_recv_data_bytes);
+        } 
+
+		/*recv pack file content data from sever*/
+		memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
+        i_recv_data_bytes = client_recv_data(i_connect_fd, (char *)c_pack_buf_a, st_test_hdr.ui_dat_len); 
+	    if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+		    return FILEDATA_DEAL_RET_FAIL;
+	    } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+	    } else {
+			/*check having read file size */
+            if (i_recv_data_bytes != st_test_hdr.ui_dat_len) {
+			    file_running("file size is checking fail!\n");	
+			    return FILEDATA_DEAL_RET_FAIL; 
+		    }
+            file_running("recv server file content of tlv pack data is success!\n");
+			file_printf("client_recv_data recv tlv pack data %d bytes\n", i_recv_data_bytes);
+        }
+
+        /*decode the tlv pack data*/
+		memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
+		st_file_data.cp_file_content = (char *)malloc(st_test_hdr.ui_dat_len);
+		if (NULL == st_file_data.cp_file_content) {
+            perror("malloc");
+			file_error("[%s]malloc is fail!\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL; 
+		}
+		i_ret = tlv_decode_file(c_pack_buf_a, st_test_hdr.ui_dat_len, &st_file_data);
+		if (TLV_DECODE_RET_FAIL == i_ret) {
+            file_error("[%s]tlv_decode_file is fail!\n", __FUNCTION__);  
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		/*open the file*/
+		while (1) {
+          	i_file_fd = open(st_file_data.c_file_name, O_WRONLY|O_CREAT|O_EXCL);
+          	if (-1 == i_file_fd) {
+          		if (errno == EEXIST) {
+					i_ret = remove(st_file_data.c_file_name);
+					if (-1 == i_ret) {
+                        perror("remove");
+						file_error("[%s]remove is error!\n", __FUNCTION__);
+						return 0;
+					}
+                    continue;
+          	    } else {
+                    perror("open");
+            		file_error("[%s]open is fail!\n", __FUNCTION__);
+            	    return FILEDATA_DEAL_RET_FAIL;     
+				}
+          	} else {
+                break;
+			}   
+		}
+
+		/*write data to filename*/	
+        sst_write_bytes = datadeal_file_write(i_file_fd, st_file_data.cp_file_content, st_file_data.ui_file_size);
+        if (-1 == sst_write_bytes) {
+            file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+    		return FILEDATA_DEAL_RET_FAIL;     
+    	}
+		file_running("file write is success!\n");
+
+		close(i_file_fd);
+		if (NULL != st_file_data.cp_file_content) {
+            free(st_file_data.cp_file_content);
+			st_file_data.cp_file_content = NULL;
+		}
 	}    
 }
 
@@ -901,7 +1133,7 @@ int datadeal_file_list(int i_connect_fd)
 			i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
             if (i_ret == FILE_CLIENT_ERROR) {
                 file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
-				return FILEDATA_DEAL_RET_OK;
+				return FILEDATA_DEAL_RET_FAIL;
 			}
             
             if (strncmp(c_filename_buf_a, "end", 3) == 0) {
@@ -913,7 +1145,69 @@ int datadeal_file_list(int i_connect_fd)
 		}
 	}
 	if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+		
+	    FILE_DATA_ST st_file_data;
+		char c_pack_buf_a[BUFSIZE];
+	    unsigned int ui_tlv_totol_len = 0; 
+		int i_ret = TLV_ENCODE_RET_OK;
 
+        /*pading the FILE_DATA_ST structure*/
+        memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
+	    strcpy(st_file_data.c_file_cmd, "L");
+	    st_file_data.c_file_cmd[1] = '\0';
+		st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+
+		/*tlv encode the st_file_data*/
+		i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
+		if (TLV_ENCODE_RET_FAIL == i_ret) {
+            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+	    /*pading the g_st_test_hdr structure*/
+		g_st_test_hdr.en_version = VERSION_ONE;
+		g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
+		g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+
+		/*sned the g_st_test_hdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+		if (i_ret == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+		file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+
+		/*sned the cmd tlv pack data*/
+        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
+		if (i_send_bytes == FILE_CLIENT_ERROR) {
+            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+			return FILEDATA_DEAL_RET_FAIL;
+		}
+
+		file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
+		file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
+		file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
+        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+            file_printf("%hhX\n", c_pack_buf_a[i]);
+		}
+
+		/*recv file description from server*/
+        file_running("server file as follow:\n");
+		while (1) {    
+			memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
+			i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
+            if (i_ret == FILE_CLIENT_ERROR) {
+                file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
+				return FILEDATA_DEAL_RET_FAIL;
+			}
+            
+            if (strncmp(c_filename_buf_a, "end", 3) == 0) {
+                file_printf("recv filename data complete!\n");
+				break;
+			}
+			
+            file_running("%s\n", c_filename_buf_a);		
+		}
 	}	
 }
 

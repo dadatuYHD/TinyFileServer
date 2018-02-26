@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "file_client_tlv.h"
+#include "file_client_debug.h"
+
 
 int write_block(char ** p_dst, unsigned int ui_write_len, void * p_src, char *cp_end_data)
 {
@@ -21,7 +23,7 @@ int write_int(unsigned int data, char **p_dst, char *cp_end_data)
 	
 	i_ret = write_block(p_dst, sizeof(int), &i_net_data, cp_end_data);
 	if (TLV_ENCODE_RET_FAIL == i_ret) {
-		printf("write_block over lap\n");
+		file_error("[%s]write_block over lap!\n", __FUNCTION__);
         return TLV_ENCODE_RET_FAIL;
 	}
 
@@ -41,7 +43,7 @@ int read_int(unsigned     int *data, char **p_src, char * cp_end_data)
 
 	i_ret = read_block(data, p_src, sizeof(int), cp_end_data);
 	if (TLV_DECODE_RET_FAIL == i_ret) {
-		printf("read_block over lap\n");
+		file_error("[%s]read_block over lap!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
 	}
 
@@ -122,7 +124,7 @@ int tlv_decode_file(char *cp_buf, unsigned int ui_tlv_totol_len,FILE_DATA_STP st
 
 	read_int(&en_tlv_type, &cp_read_data, cp_end_data);
 	if (TLV_FILE_ROOT != en_tlv_type) {
-		printf("read TLV_FILE_ROOT is fail!\n");
+		file_error("[%s]read TLV_FILE_ROOT is fail!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
 	}
 
@@ -149,7 +151,7 @@ int tlv_decode_file(char *cp_buf, unsigned int ui_tlv_totol_len,FILE_DATA_STP st
 			    ui_tlv_len_sum = ui_tlv_len_sum - (8 + ui_tlv_len);
 				break;
 			default:
-				printf("tlv decode is fail!\n");
+				file_error("[%s]tlv decode is fail!\n", __FUNCTION__);
 				break;		
 		}
 	}
