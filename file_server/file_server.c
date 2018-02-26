@@ -53,11 +53,9 @@ int server_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
 	int i_send_bytes = 0;
 	int i_total_send_bytes = 0;
 
-    while (i_total_send_bytes < i_bufsize)
-    {
+    while (i_total_send_bytes < i_bufsize) {
         i_send_bytes = send(i_connect_fd, (char *)p_buf, i_bufsize - i_total_send_bytes, 0);
-		if (-1 == i_send_bytes)
-		{
+		if (-1 == i_send_bytes) {
             perror("send");
 			return FILE_SERVER_ERROR;
 		}
@@ -138,7 +136,6 @@ void * server_client_data_deal(void *arg)
 	}
 }
 
-
 int server_get_listenfd(void)
 {
     return g_iListenFd;
@@ -156,23 +153,20 @@ int server_init_socket(int iPort)
 
 	/*create the socket*/
 	g_iListenFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (-1 == g_iListenFd)
-	{
+	if (-1 == g_iListenFd) {
         file_error("socket create is faileed!\n");
 		return FILE_SERVER_ERROR;
 	}
 
     iRet = bind(g_iListenFd, (SA *)&stServerAddr, sizeof(stServerAddr));
-	if (-1 == iRet)
-	{
+	if (-1 == iRet) {
         file_error("bind is failed!\n");
 		close(g_iListenFd);
 		return FILE_SERVER_ERROR;
 	}
 
 	iRet = listen(g_iListenFd, BACKLOG);
-	if (-1 == iRet)
-	{
+	if (-1 == iRet) {
         file_error("listen is faileed!\n");
 		close(g_iListenFd);
 		return FILE_SERVER_ERROR;
@@ -204,16 +198,14 @@ int server_deal_client_request(void)
 	file_running("client port is: %d,  ip is: %s\n", ntohs(stClientAddr.sin_port), cClientIpStr_a);
 
     iRet = pthread_create(&threadId, NULL, (void *)server_client_data_deal, (void *)iConnectFd);
-	if (0 != iRet)
-	{
+	if (0 != iRet) {
         perror("pthread_create");
 		close(g_iListenFd);
 		close(iConnectFd);
 		return FILE_SERVER_ERROR;
 	}
 	iRet = pthread_detach(threadId);
-	if (0 != iRet)
-	{
+	if (0 != iRet) {
         perror("pthread_detach");
 		close(g_iListenFd);
 		close(iConnectFd);

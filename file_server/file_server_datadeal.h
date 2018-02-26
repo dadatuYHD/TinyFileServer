@@ -57,11 +57,4 @@ int datadeal_file_set(int i_connect_fd);
 int datadeal_file_list(int i_connect_fd);
 TEST_HDR_T * datadeal_get_phdr(void);
 
-
-
-
-
-
-
-
 #endif
