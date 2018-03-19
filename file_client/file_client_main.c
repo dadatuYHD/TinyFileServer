@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
     /*major state*/
     file_state_main();  
 
-	return 0;
+    return 0;
 }
 
 

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <arpa/inet.h>
-#include <sys/types.h>			/* See NOTES */
+#include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <sys/epoll.h>
@@ -27,23 +27,23 @@ int server_recv_data(int i_connect_fd, void *p_buf, int i_bufsize)
     assert(NULL != p_buf);
 
     int i_recv_bytes = 0;
-	int i_total_recv_bytes = 0;
+    int i_total_recv_bytes = 0;
     int i_ret = FILE_SERVER_OK;
 
     while (i_total_recv_bytes < i_bufsize) {
         i_recv_bytes = recv(i_connect_fd, (char *)p_buf, i_bufsize - i_total_recv_bytes, 0);
-	    if (-1 == i_recv_bytes) {
+        if (-1 == i_recv_bytes) {
             perror("recv");
-		    close(i_connect_fd);
-		    return FILE_SERVER_ERROR;
-	    } else if (0 ==i_recv_bytes) {
+            close(i_connect_fd);
+            return FILE_SERVER_ERROR;
+        } else if (0 ==i_recv_bytes) {
             file_error("peer is shutdown");
-		    close(i_connect_fd);
-		    return FILE_SERVER_RECV_PEER_DOWN;
-		} else {
-		    i_total_recv_bytes += i_recv_bytes;
-	    }     
-	}
+            close(i_connect_fd);
+            return FILE_SERVER_RECV_PEER_DOWN;
+        } else {
+            i_total_recv_bytes += i_recv_bytes;
+        }     
+    }
 
     return i_total_recv_bytes;
 }
@@ -52,33 +52,33 @@ int server_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
 {
     assert(NULL != p_buf);
 
-	int i_send_bytes = 0;
-	int i_total_send_bytes = 0;
+    int i_send_bytes = 0;
+    int i_total_send_bytes = 0;
 
     while (i_total_send_bytes < i_bufsize) {
         i_send_bytes = send(i_connect_fd, (char *)p_buf, i_bufsize - i_total_send_bytes, 0);
-		if (-1 == i_send_bytes) {
+        if (-1 == i_send_bytes) {
             perror("send");
-			return FILE_SERVER_ERROR;
-		}
+            return FILE_SERVER_ERROR;
+        }
 
-		i_total_send_bytes += i_send_bytes;
-	}
+        i_total_send_bytes += i_send_bytes;
+    }
 
-	return i_total_send_bytes;
+    return i_total_send_bytes;
 }
 
 void * server_client_data_deal(void *arg)
 {
     int i_connect_fd = (int)arg;
     char c_pack_buf_a[BUFSIZE];
-	TEST_HDR_T * stp_test_hdr = NULL;
-	int i_ret = FILE_SERVER_OK;
-	int i_recv_hdr_bytes = 0;
+    TEST_HDR_T * stp_test_hdr = NULL;
+    int i_ret = FILE_SERVER_OK;
+    int i_recv_hdr_bytes = 0;
 
     while (1) {
         /*recv data hdr*/
-	    file_running("start recv client data hdr!\n");
+        file_running("start recv client data hdr!\n");
         stp_test_hdr = datadeal_get_phdr();
         memset(stp_test_hdr, 0, sizeof(TEST_HDR_T));
         i_recv_hdr_bytes = server_recv_data(i_connect_fd, stp_test_hdr, sizeof(TEST_HDR_T));
@@ -134,8 +134,8 @@ void * server_client_data_deal(void *arg)
             file_running("server close!\n");
             close(i_connect_fd);
             return (void *)FILE_SERVER_OK;        
-		}    
-	}
+        }    
+    }
 }
 
 int server_get_listenfd(void)
@@ -145,36 +145,36 @@ int server_get_listenfd(void)
 
 int server_init_socket(int iPort)
 {
-	SA_I stServerAddr;     
-	int iRet = 0;
+    SA_I stServerAddr;     
+    int iRet = 0;
 
-	memset(&stServerAddr, 0, sizeof(stServerAddr));
-	stServerAddr.sin_family = AF_INET;
-	stServerAddr.sin_port = htons(iPort); 
+    memset(&stServerAddr, 0, sizeof(stServerAddr));
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_port = htons(iPort); 
     stServerAddr.sin_addr.s_addr = INADDR_ANY;
 
-	/*create the socket*/
-	g_iListenFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (-1 == g_iListenFd) {
+    /*create the socket*/
+    g_iListenFd = socket(AF_INET, SOCK_STREAM, 0);
+    if (-1 == g_iListenFd) {
         file_error("socket create is faileed!\n");
-		return FILE_SERVER_ERROR;
-	}
+        return FILE_SERVER_ERROR;
+    }
 
     iRet = bind(g_iListenFd, (SA *)&stServerAddr, sizeof(stServerAddr));
-	if (-1 == iRet) {
+    if (-1 == iRet) {
         file_error("bind is failed!\n");
-		close(g_iListenFd);
-		return FILE_SERVER_ERROR;
-	}
+        close(g_iListenFd);
+        return FILE_SERVER_ERROR;
+    }
 
-	iRet = listen(g_iListenFd, BACKLOG);
-	if (-1 == iRet) {
+    iRet = listen(g_iListenFd, BACKLOG);
+    if (-1 == iRet) {
         file_error("listen is faileed!\n");
-		close(g_iListenFd);
-		return FILE_SERVER_ERROR;
-	}
+        close(g_iListenFd);
+        return FILE_SERVER_ERROR;
+    }
 
-	return FILE_SERVER_OK;
+    return FILE_SERVER_OK;
 }
 
 #if EPOLL_SERVER
@@ -182,45 +182,46 @@ int server_deal_client_request(void)
 {
     
 }
+
 #elif MULTI_THREAD_SERVER
 int server_deal_client_request(void)
 {
     int iConnectFd = 0;
-	SA_I stClientAddr;
-	socklen_t clientAddrlen = sizeof(stClientAddr);
-	char cClientIpStr_a[CLIENT_IP_STR_LEN];
+    SA_I stClientAddr;
+    socklen_t clientAddrlen = sizeof(stClientAddr);
+    char cClientIpStr_a[CLIENT_IP_STR_LEN];
     pthread_t threadId;
-	int iRet = FILE_SERVER_OK;
-	
-	memset(&stClientAddr, 0, sizeof(stClientAddr));
-	iConnectFd = accept(g_iListenFd, (SA *)&stClientAddr, &clientAddrlen);
-	if (-1 == iConnectFd) {
+    int iRet = FILE_SERVER_OK;
+    
+    memset(&stClientAddr, 0, sizeof(stClientAddr));
+    iConnectFd = accept(g_iListenFd, (SA *)&stClientAddr, &clientAddrlen);
+    if (-1 == iConnectFd) {
         perror("accept");
-		close(g_iListenFd);
-	    return FILE_SERVER_ERROR;
-	}
+        close(g_iListenFd);
+        return FILE_SERVER_ERROR;
+    }
 
     file_running("client connect is success!\n");
     memset(cClientIpStr_a, 0, sizeof(cClientIpStr_a));
-	inet_ntop(AF_INET, &stClientAddr.sin_addr.s_addr, cClientIpStr_a, sizeof(cClientIpStr_a));
-	file_running("client port is: %d,  ip is: %s\n", ntohs(stClientAddr.sin_port), cClientIpStr_a);
+    inet_ntop(AF_INET, &stClientAddr.sin_addr.s_addr, cClientIpStr_a, sizeof(cClientIpStr_a));
+    file_running("client port is: %d,  ip is: %s\n", ntohs(stClientAddr.sin_port), cClientIpStr_a);
 
     iRet = pthread_create(&threadId, NULL, (void *)server_client_data_deal, (void *)iConnectFd);
-	if (0 != iRet) {
+    if (0 != iRet) {
         perror("pthread_create");
-		close(g_iListenFd);
-		close(iConnectFd);
-		return FILE_SERVER_ERROR;
-	}
-	iRet = pthread_detach(threadId);
-	if (0 != iRet) {
+        close(g_iListenFd);
+        close(iConnectFd);
+        return FILE_SERVER_ERROR;
+    }
+    iRet = pthread_detach(threadId);
+    if (0 != iRet) {
         perror("pthread_detach");
-		close(g_iListenFd);
-		close(iConnectFd);
-		return FILE_SERVER_ERROR;
-	}
+        close(g_iListenFd);
+        close(iConnectFd);
+        return FILE_SERVER_ERROR;
+    }
 
-	return FILE_SERVER_OK;
+    return FILE_SERVER_OK;
 }
 #endif
 

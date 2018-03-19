@@ -12,6 +12,7 @@ void   file__data__init
   static FILEDATA init_value = FILE__DATA__INIT;
   *message = init_value;
 }
+
 size_t file__data__get_packed_size
                      (const FILEDATA *message)
 {
