@@ -126,3 +126,4 @@ const ProtobufCMessageDescriptor file__data__descriptor =
   (ProtobufCMessageInit) file__data__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+
