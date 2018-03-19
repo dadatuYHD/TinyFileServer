@@ -61,7 +61,7 @@ return:返回g_st_test_hdr
 int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 {
     assert(NULL != pst_test_hdr);
-
+        
     if (en_flg == HDR_FIELD_VERSION) {
         g_st_test_hdr.en_version = pst_test_hdr->en_version;   
 	} else if (en_flg == HDR_FIELD_HDR_LEN) {
