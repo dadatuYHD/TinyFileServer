@@ -13,9 +13,11 @@
 #include "file_server_datadeal.h"
 
 
-#define BACKLOG           1024
-#define CLIENT_IP_STR_LEN 50
-#define BUFSIZE           1024
+#define BACKLOG                  1024
+#define CLIENT_IP_STR_LEN        50
+#define BUFSIZE                  1024
+#define EPOLL_SERVER             1
+#define MULTI_THREAD_SERVER      0
 
 
 int g_iListenFd = 0;
@@ -175,6 +177,12 @@ int server_init_socket(int iPort)
 	return FILE_SERVER_OK;
 }
 
+#if EPOLL_SERVER
+int server_deal_client_request(void) 
+{
+    
+}
+#elif MULTI_THREAD_SERVER
 int server_deal_client_request(void)
 {
     int iConnectFd = 0;
@@ -214,4 +222,5 @@ int server_deal_client_request(void)
 
 	return FILE_SERVER_OK;
 }
+#endif
 

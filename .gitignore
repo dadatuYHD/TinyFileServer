@@ -60,3 +60,6 @@ file_client
 
 #test file
 *.txt
+
+#ctags
+.tags*
