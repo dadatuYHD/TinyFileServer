@@ -1,4 +1,4 @@
-# file_server
+# TinyFileServer
 ### function: 
 * simple file server, you can set the file to server or get the file from server and list file of server
 ### feature:
