@@ -26,13 +26,21 @@ int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf);
 
 
 
-/************************************************************
-FUNCTION:file_input_int()
-Description:该函数主要用来对来自标准输入的运算整数字符串数的处理
-Arguments:
-Arg1[uipInputInt][In]:暂时存放字符串数字成功转换成整数的地址的指针
-return:成功返回FILEINPUT_RET_OK,输入字符串包含非法字符返回FILEINPUT_RET_FAIL_INPUT_INVALID,输入字符串不再合理范围，返回FILEINPUT_RET_FAIL_INPUT_OUTOFRANGE
-***********************************************************/
+/***************************************************************************
+* FUNCTION             :file_input_int()
+* Description          :Processing of arithmetic integer 
+*                       string numbers from standard input
+* Arguments            :
+* Arg1[uipInputInt][In]:A pointer to temporarily store the 
+*                       address of the string number 
+*                       successfully converted into an integer
+* return               :Successfully return FILEINPUT_RET_OK, 
+*                       the input string contains illegal 
+*                       characters, return FILEINPUT_RET_FAIL_INPUT_INVALID, 
+*                       the input string is no longer in a reasonable range, 
+*                       return FILEINPUT_RET_FAIL_INPUT_OUTOFRANGE，error 
+*                       return FILEINPUT_RET_FAIL
+***************************************************************************/
 int file_input_int(unsigned int * uipInputInt)
 {
     unsigned int iRet = FILEINPUT_RET_OK;
@@ -60,11 +68,14 @@ int file_input_int(unsigned int * uipInputInt)
 
 
 /************************************************************
-FUNCTION:file_input_string()
-Description:该函数主要用来从标准输入读取字符串
-Arguments:
-Arg1[pcInputBuf][In]:存放来自标准输入字符串的指针
-return:成功返回FILEINPUT_RET_OK,错误返回FILEINPUT_RET_FAIL
+* FUNCTION            :file_input_string()
+* Description         :This function is mainly used to read 
+*                      strings from standard input
+* Arguments           :
+* Arg1[pcInputBuf][In]:Store a pointer from the standard 
+*                      input string
+* return              :Successfully return FILEINPUT_RET_OK, 
+*                      error return FILEINPUT_RET_FAIL
 ***********************************************************/
 int file_input_string(char * pcInputBuf)
 {
@@ -81,14 +92,20 @@ int file_input_string(char * pcInputBuf)
     return FILEINPUT_RET_OK;
 }
 
-/************************************************************
-FUNCTION:file_input_intfrombuf()
-Description:该函数将来字符串数字转换成整型数字,并且检查输入字符串是否合理
-Arguments:
-Arg1[uipInputInt][Out]:暂时存放字符串数字成功转换成整数的地址的指针
-Arg2[pcInputBuf][In]:存放来自标准输入字符串的指针
-return:成功返回FILEINPUT_RET_OK,错误返回FILEINPUT_RET_FAIL
-***********************************************************/
+/***************************************************************
+* FUNCTION              :file_input_intfrombuf()
+* Description           :This function converts string numbers 
+*                        into integer numbers and checks whether 
+*                        the input string is reasonable
+* Arguments:
+* Arg1[uipInputInt][Out]:Point to the buf that stores the string 
+*                        number successfully converted into an 
+*                        integer
+* Arg2[pcInputBuf][In]  :Store the address from the standard 
+*                        input string
+* return                :Successfully return FILEINPUT_RET_OK, 
+*                        error return FILEINPUT_RET_FAIL
+***************************************************************/
 int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf)
 {
     int iRet = FILEINPUT_RET_OK;
@@ -118,14 +135,14 @@ int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf)
 }
 
 
-/************************************************************
-FUNCTION:file_input_StrNumConvertIntegerNum()
-Description:该函数将来字符串数字转换成整型数字
-Arguments:
-Arg1[uipInputInt][Out]:暂时存放字符串数字成功转换成整数的地址的指针
-Arg2[pcInputBuf][In]:存放来自标准输入字符串的指针
-return:无返回值
-***********************************************************/
+/****************************************************************************
+* FUNCTION              :file_input_StrNumConvertIntegerNum()
+* Description           :Convert string numbers to integer numbers
+* return                :Successfully return FILEINPUT_RET_OK, 
+*                        the input string is no longer in a reasonable range, 
+*                        return FILEINPUT_RET_FAIL_INPUT_OUTOFRANGE，error 
+*                        return FILEINPUT_RET_FAIL
+****************************************************************************/
 int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, char * pcInputBuf)
 {
     if (NULL == uipInputInt || NULL == pcInputBuf)
@@ -151,11 +168,13 @@ int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, char * pcInpu
 }
 
 /************************************************************
-FUNCTION:file_input_numcheck()
-Description:检查转换之后的数字是否在合理的范围内
-Arguments:
-Arg1[uipInputInt][In]:存放待检查的整形数字
-return:成功返回FILEINPUT_RET_OK,失败返回FILEINPUT_RET_FAIL
+* FUNCTION             :file_input_numcheck()
+* Description          :Check whether the converted number 
+*                       is within a reasonable range
+* Arguments            :
+* Arg1[uipInputInt][In]:Store the numbers to be checked
+* return               :Return FILEINPUT_RET_OK on success, 
+*                       return FILEINPUT_RET_FAIL on failure
 ***********************************************************/
 int file_input_module_numcheck(unsigned int uipInputInt)
 {
@@ -179,11 +198,13 @@ int file_input_cmd_numcheck(unsigned int uipInputInt)
 
 
 /************************************************************
-FUNCTION:file_input_char()
-Description:对来自标准输入的操作符字符的处理
-Arguments:
-Arg1[pcOperator][In]:存放操作的字符数组的指针
-return:成功返回FILEINPUT_RET_OK,失败返回FILEINPUT_RET_FAIL
+* FUNCTION            :file_input_char()
+* Description         :read of operator characters from 
+*                      standard input
+* Arguments           :
+* Arg1[pcOperator][In]:Point to a char space
+* return              :Return FILEINPUT_RET_OK on success, 
+*                      return FILEINPUT_RET_FAIL on failure
 ***********************************************************/
 int file_input_char(char * pcOperator)
 {

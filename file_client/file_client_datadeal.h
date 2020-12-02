@@ -5,7 +5,8 @@
 #define FILEDATA_DEAL_RET_FAIL -1
 
 
-/*头部版本号*/
+/*Head version*/
+
 typedef enum {
     VERSION_ONE = 1,
 	VERSION_TWO,
@@ -13,7 +14,10 @@ typedef enum {
 	VERSION_MAX,
 }VERSION_E;
 
-/*描述处理头部哪一个字段结构*/
+/**********************************
+ * Describe which field structure 
+ * of the header is processed
+ *********************************/
 typedef enum {
     HDR_FIELD_VERSION = 1,
 	HDR_FIELD_HDR_LEN,
@@ -23,7 +27,7 @@ typedef enum {
 }HDR_FIELD_FLG ;
 
 
-/*头部数据交换格式*/
+/*Header data exchange format*/
 typedef enum  {
 	MODULE_TEST_PROTO = 0,
 	MODULE_TEST_TLV,
@@ -31,7 +35,7 @@ typedef enum  {
 	MODULE_MAX,
 }MODULE_E;
 
-/*头部命令定义*/
+/*Head command definition*/
 typedef enum {
     CMD_TEST_SET = 0,
     CMD_TEST_GET,
@@ -40,16 +44,17 @@ typedef enum {
     CMD_MAX,
 }CMD_E;
 
-/*数据头部声明*/
+/*Data header declaration*/
 typedef struct test_hdr_s {
-	VERSION_E      en_version;     //头部版本暂定为1  收到后需校验
-	unsigned short us_hdr_len;     //头部长度	收到后需校验
-	unsigned int   ui_dat_len;	   //负载数据长度
-	MODULE_E       en_module;	   //当前业务模块
-	CMD_E          en_cmd;	       //模块下的命令号
-}TEST_HDR_T;
+	VERSION_E      en_version;     // The header version is tentatively set to one, 
+                                   // and needs to be verified after receipt
+	unsigned short us_hdr_len;     // Header length needs to be verified after receipt
+	unsigned int   ui_dat_len;	   // Load data length
+	MODULE_E       en_module;	   // Current business module
+	CMD_E          en_cmd;	       // Command number under the module
+}TEST_HDR_T;                   
 
-/*头部处理函数声名*/
+/*Head processing function declaration*/
 TEST_HDR_T datadeal_get_hdr(void);
 TEST_HDR_T * datadeal_get_phdr(void);
 int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg);

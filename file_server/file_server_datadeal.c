@@ -97,12 +97,13 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 }
 
 /************************************************************
-FUNCTION:datadeal_proto_pack()
-Description:以protobuf协议编码数据
-Arguments:
-[stp_unpack_buf][IN]：指向存放原始数据的内存
-[cp_pack_buf][OUT]：保存打包完成的数据
-return:返回打包之后数据的大小
+* FUNCTION            :datadeal_proto_pack()
+* Description         :Encode data with protobuf protocol
+* Arguments           :
+* [stp_unpack_buf][IN]:Point to the memory where the original 
+*                      data is stored
+* [cp_pack_buf][OUT]  :Save the packaged data
+* return              :Returns the size of the packed data
 ************************************************************/
 int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 {
@@ -176,12 +177,13 @@ int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 }
 
 /************************************************************
-FUNCTION:datadeal_proto_unpack()
-Description:以protobuf协议解码数据
-Arguments:
-[cp_pack_buf][IN]：待解包的数据
-[stp_unpack_buf][OUT]:存放解包之后的数据
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION             :datadeal_proto_unpack()
+* Description          :Decode data with protobuf protocol
+* Arguments:
+* [cp_pack_buf][IN]    :Data to be unpacked
+* [stp_unpack_buf][OUT]:Store the unpacked data
+* return               :success return FILEDATA_DEAL_RET_OK 
+*                       and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size)
 {
@@ -229,13 +231,13 @@ int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_siz
 }
 
 /************************************************************
-FUNCTION:datadeal_file_read()
-Description:该函数主要用来读取文件
-Arguments:
-[i_fd][IN]：文件描述符
-[buf][IN]：存储文件的buf
-[nbytes][IN]：需要读取的文件大小
-return:返回总共读取的bytes
+* FUNCTION    :datadeal_file_read()
+* Description :Read file contents
+* Arguments   :
+* [i_fd][IN]  :File descriptor
+* [buf][OUT]   :Buf to store the contents of the file
+* [nbytes][IN]:File size to be read
+* return      :Returns the total bytes read
 ************************************************************/
 int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes)
 {
@@ -256,13 +258,14 @@ int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_write()
-Description:该函数主要用来写入数据到文件描述符指定的文件
-Arguments:
-[i_fd][IN]：文件描述符
-[buf][IN]：待读取文件数据的buf
-[nbytes][IN]：需要写入的文件大小
-return:返回总共读取的bytes
+* FUNCTION    :datadeal_file_write()
+* Description :Write data to the file specified by the file 
+*              descriptor
+* Arguments   :
+* [i_fd][IN]  :File descriptor
+* [buf][IN]   :Buf to store the file data to be read
+* [nbytes][IN]:The size of the file to be written
+* return      :Return the total bytes written
 ************************************************************/
 int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes)
 {
@@ -284,11 +287,13 @@ int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes)
 
 
 /************************************************************
-FUNCTION:datadeal_file_list()
-Description:处理客户端发送过来的L命令
-Arguments:
-[i_connect_fd][IN]:建立连接之后的文件描述符
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION          :datadeal_file_list()
+* Description       :Process "L" commands sent by the client
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK and 
+*                    fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_list(int i_connect_fd)
 {
@@ -494,12 +499,14 @@ int datadeal_file_list(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_list_deal()
-Description:递归描述目录下的文件情况
-Arguments:
-[cp_filename][IN]:目录名字
-[i_connect_fd][IN]:建立连接之后的文件描述符
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION          :datadeal_file_list_deal()
+* Description       :Recursively describe the files in the 
+*                    directory
+* Arguments         :
+* [cp_filename][IN] :Directory name
+* [i_connect_fd][IN]:File descriptor after connection establishment
+* return            :success return FILEDATA_DEAL_RET_OK and 
+*                    fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_list_deal(const char * cp_filename, int i_connect_fd)
 {
@@ -549,11 +556,13 @@ int datadeal_file_list_deal(const char * cp_filename, int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_set()
-Description:处理客户端发送过来的S命令
-Arguments:
-[i_connect_fd][IN]:建立连接之后的文件描述符
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION          :datadeal_file_set()
+* Description       :Process the "G" command sent by the client
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK 
+*                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_get(int i_connect_fd)
 {
@@ -1001,11 +1010,13 @@ int datadeal_file_get(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_set()
-Description:处理客户端发送过来的S命令
-Arguments:
-[i_connect_fd][IN]:建立连接之后的文件描述符
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION          :datadeal_file_set()
+* Description       :Process the "S" command sent by the client
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK 
+*                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_set(int i_connect_fd)
 {

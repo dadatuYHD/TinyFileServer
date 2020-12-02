@@ -19,7 +19,7 @@
 
 #define BUFSIZE 1024
 
-TEST_HDR_T g_st_test_hdr;    //全局数据头部
+TEST_HDR_T g_stTestHdr;    //全局数据头部
 
 int datadeal_proto_pack(FILEDATA *cp_unpack_buf, char **cp_pack_buf);
 int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size);
@@ -27,51 +27,53 @@ int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes);
 int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes);
 
 /************************************************************
-FUNCTION:datadeal_get_hdr()
-Description:该函数主要用来文件间传递g_st_test_hdr全局变量
-Arguments:无
-return:返回g_st_test_hdr
+* FUNCTION   :datadeal_get_hdr()
+* Description:get value of g_stTestHdr 
+* Arguments  :none
+* return     :return g_stTestHdr
 ************************************************************/
 TEST_HDR_T datadeal_get_hdr(void)
 {
-    return g_st_test_hdr;
+    return g_stTestHdr;
 }
 
 /************************************************************
-FUNCTION:datadeal_get_phdr()
-Description:该函数主要用来读取g_st_test_hdr全局变量的地址
-Arguments:无
-return:返回g_st_test_hdr address
+* FUNCTION   :datadeal_get_phdr()
+* Description:get address value of g_stTestHdr  
+* Arguments  :none
+* return     :return g_st_test_hdr address
 ************************************************************/
 TEST_HDR_T * datadeal_get_phdr(void)
 {
-    return &g_st_test_hdr;
+    return &g_stTestHdr;
 }
 
 
 
-/************************************************************
-FUNCTION:datadeal_set_hdr()
-Description:该函数主要用来文件间设置全局变量g_st_test_hdr
-Arguments:
-[pst_test_hdr][IN]：指向一个TEST_HDR_T结构，存放有待设置的数据
-[en_flg][IN]：设置标志位
-return:返回g_st_test_hdr
-************************************************************/
+/*******************************************************************
+* FUNCTION          :datadeal_set_hdr()
+* Description       :Set global variable g_stTestHdr between modules
+* Arguments         :
+* [pst_test_hdr][IN]:Point to a TEST_HDR_T structure to store the 
+*                    data to be set
+* [en_flg][IN]      :Set the en_flg
+* return            :success return FILEDATA_DEAL_RET_OK, return 
+*                    FILEDATA_DEAL_RET_FAIL
+*******************************************************************/
 int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 {
     assert(NULL != pst_test_hdr);
         
     if (en_flg == HDR_FIELD_VERSION) {
-        g_st_test_hdr.en_version = pst_test_hdr->en_version;   
+        g_stTestHdr.en_version = pst_test_hdr->en_version;   
     } else if (en_flg == HDR_FIELD_HDR_LEN) {
-        g_st_test_hdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
+        g_stTestHdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
     } else if (en_flg == HDR_FIELD_DATA_LEN) {
-        g_st_test_hdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
+        g_stTestHdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
     } else if (en_flg == HDR_FIELD_MODULE) {
-        g_st_test_hdr.en_module = pst_test_hdr->en_module;   
+        g_stTestHdr.en_module = pst_test_hdr->en_module;   
     } else if (en_flg == HDR_FIELD_CMD) {
-        g_st_test_hdr.en_cmd = pst_test_hdr->en_cmd;   
+        g_stTestHdr.en_cmd = pst_test_hdr->en_cmd;   
     } else {
         file_error("[%s]datadeal_set_hdr input flag is error!\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;   
@@ -81,13 +83,13 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_read()
-Description:该函数主要用来读取文件
-Arguments:
-[i_fd][IN]：文件描述符
-[buf][IN]：存储文件的buf
-[nbytes][IN]：需要读取的文件大小
-return:返回总共读取的bytes
+* FUNCTION    :datadeal_file_read()
+* Description :Read file contents
+* Arguments   :
+* [i_fd][IN]  :File descriptor
+* [buf][OUT]   :Buf to store the contents of the file
+* [nbytes][IN]:File size to be read
+* return      :Returns the total bytes read
 ************************************************************/
 int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes)
 {
@@ -108,13 +110,14 @@ int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_write()
-Description:该函数主要用来写入数据到文件描述符指定的文件
-Arguments:
-[i_fd][IN]：文件描述符
-[buf][IN]：待读取文件数据的buf
-[nbytes][IN]：需要写入的文件大小
-return:返回总共读取的bytes
+* FUNCTION    :datadeal_file_write()
+* Description :Write data to the file specified by the file 
+*              descriptor
+* Arguments   :
+* [i_fd][IN]  :File descriptor
+* [buf][IN]   :Buf to store the file data to be read
+* [nbytes][IN]:The size of the file to be written
+* return      :Return the total bytes written
 ************************************************************/
 int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes)
 {
@@ -134,12 +137,15 @@ int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes)
     return st_total_write_bytes;
 }
 
+
 /************************************************************
-FUNCTION:datadeal_file_set()
-Description:该函数主要用来获取服务器保存的文件
-Arguments:
-[i_connect_fd][IN]：已经建立好连接的文件描述符
-return:返回g_st_test_hdr
+* FUNCTION          :datadeal_file_set()
+* Description       :upload files
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK 
+*                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_set(int i_connect_fd)
 {
@@ -149,7 +155,7 @@ int datadeal_file_set(int i_connect_fd)
     struct stat st_file_info;
     ssize_t sst_read_bytes = 0;
         
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
         FILEDATA st_unpack_buf;
         char *cp_pack_buf = NULL;
         int i_pack_len = 0; 
@@ -236,13 +242,13 @@ int datadeal_file_set(int i_connect_fd)
         }
         close(i_file_fd);
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_pack_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_pack_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -257,8 +263,8 @@ int datadeal_file_set(int i_connect_fd)
         }
         file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_pack_buf[i]);
         }
         
@@ -266,7 +272,7 @@ int datadeal_file_set(int i_connect_fd)
             free(cp_pack_buf);
         }   
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
 
         cJSON *stp_cjson_root = cJSON_CreateObject();
         char *cp_cjson_data_out = NULL;
@@ -335,13 +341,13 @@ int datadeal_file_set(int i_connect_fd)
         /*judge the data size of bytes*/
         i_cjson_data_size = strlen(cp_cjson_data_out);
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -357,8 +363,8 @@ int datadeal_file_set(int i_connect_fd)
 
         file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
         file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_cjson_data_out[i]);
         }
 
@@ -375,7 +381,7 @@ int datadeal_file_set(int i_connect_fd)
             cp_file_data = NULL;
         }  
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         
         FILE_DATA_ST st_file_data;
         char c_pack_buf_a[BUFSIZE];
@@ -441,13 +447,13 @@ int datadeal_file_set(int i_connect_fd)
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -463,8 +469,8 @@ int datadeal_file_set(int i_connect_fd)
 
         file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", c_pack_buf_a[i]);
         }
 
@@ -477,11 +483,13 @@ int datadeal_file_set(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_get()
-Description:该函数主要用来获取服务器保存的文件
-Arguments:
-[i_connect_fd][IN]：已经建立好连接的文件描述符
-return:返回g_st_test_hdr
+* FUNCTION          :datadeal_file_set()
+* Description       :download file
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK 
+*                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_get(int i_connect_fd)
 {
@@ -492,7 +500,7 @@ int datadeal_file_get(int i_connect_fd)
     TEST_HDR_T st_test_hdr;  
     ssize_t sst_write_bytes = 0;
 
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
         
         FILEDATA st_unpack_buf;
         char *cp_pack_buf = NULL;
@@ -544,13 +552,13 @@ int datadeal_file_get(int i_connect_fd)
             st_unpack_buf.p_filedata_buf = NULL;
         }
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_pack_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_pack_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -565,8 +573,8 @@ int datadeal_file_get(int i_connect_fd)
         }
         file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_pack_buf[i]);
         }
 
@@ -679,7 +687,7 @@ int datadeal_file_get(int i_connect_fd)
         close(i_file_fd);
         
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
 
         cJSON *stp_cjson_root = cJSON_CreateObject();
         char *cp_cjson_data_out = NULL;
@@ -707,13 +715,13 @@ int datadeal_file_get(int i_connect_fd)
         /*judge the data size of bytes*/
         i_cjson_data_size = strlen(cp_cjson_data_out);
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -728,8 +736,8 @@ int datadeal_file_get(int i_connect_fd)
         }
         file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
         file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_cjson_data_out[i]);
         }
 
@@ -850,7 +858,7 @@ int datadeal_file_get(int i_connect_fd)
             stp_json = NULL;
         }
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         
         FILE_DATA_ST st_file_data;
         char c_pack_buf_a[BUFSIZE];
@@ -879,13 +887,13 @@ int datadeal_file_get(int i_connect_fd)
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -901,8 +909,8 @@ int datadeal_file_get(int i_connect_fd)
 
         file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", c_pack_buf_a[i]);
         }
 
@@ -991,11 +999,13 @@ int datadeal_file_get(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_file_list()
-Description:该函数主要用来获取服务器保存的文件名字
-Arguments:
-[i_connect_fd][IN]：已经建立好连接的文件描述符
-return:返回g_st_test_hdr
+* FUNCTION          :datadeal_file_list()
+* Description       :Get a list of file servers
+* Arguments         :
+* [i_connect_fd][IN]:File descriptor after connection 
+*                    establishment
+* return            :success return FILEDATA_DEAL_RET_OK and 
+*                    fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_file_list(int i_connect_fd)
 {  
@@ -1003,7 +1013,7 @@ int datadeal_file_list(int i_connect_fd)
     int i_send_bytes = 0;
     char c_filename_buf_a[BUFSIZE];
 
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
         FILEDATA st_unpack_buf;
         char *cp_pack_buf = NULL;
         int i_pack_len = 0;
@@ -1033,13 +1043,13 @@ int datadeal_file_list(int i_connect_fd)
             free(st_unpack_buf.p_filedata_buf);   
         }
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_pack_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_pack_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1054,8 +1064,8 @@ int datadeal_file_list(int i_connect_fd)
         }
         file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_pack_buf[i]);
         }
 
@@ -1081,7 +1091,7 @@ int datadeal_file_list(int i_connect_fd)
             file_running("%s\n", c_filename_buf_a);     
         }
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
         
         cJSON *stp_cjson_root = cJSON_CreateObject();
         char *cp_cjson_data_out = NULL;
@@ -1096,13 +1106,13 @@ int datadeal_file_list(int i_connect_fd)
         /*judge the data size of bytes*/
         i_cjson_data_size = strlen(cp_cjson_data_out);
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1118,8 +1128,8 @@ int datadeal_file_list(int i_connect_fd)
 
         file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
         file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_cjson_data_out[i]);
         }
 
@@ -1144,7 +1154,7 @@ int datadeal_file_list(int i_connect_fd)
             file_running("%s\n", c_filename_buf_a);     
         }
     }
-    if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         
         FILE_DATA_ST st_file_data;
         char c_pack_buf_a[BUFSIZE];
@@ -1164,13 +1174,13 @@ int datadeal_file_list(int i_connect_fd)
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_CLIENT_ERROR) {
             file_error("[%s]client_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1186,8 +1196,8 @@ int datadeal_file_list(int i_connect_fd)
 
         file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", c_pack_buf_a[i]);
         }
 
@@ -1216,13 +1226,13 @@ int datadeal_file_exit(int i_connect_fd)
     int i_ret = FILE_CLIENT_OK;
     int i_send_bytes = 0;
 
-    /*pading the g_st_test_hdr structure*/
-    g_st_test_hdr.en_version = VERSION_ONE;
-    g_st_test_hdr.ui_dat_len = 0;
-    g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+    /*pading the g_stTestHdr structure*/
+    g_stTestHdr.en_version = VERSION_ONE;
+    g_stTestHdr.ui_dat_len = 0;
+    g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-    /*sned the g_st_test_hdr*/
-    i_send_bytes = client_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+    /*sned the g_stTestHdr*/
+    i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
     if (i_ret == FILE_CLIENT_ERROR) {
         file_error("[%s]client_send_data is fail\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;
@@ -1233,12 +1243,13 @@ int datadeal_file_exit(int i_connect_fd)
 }
 
 /************************************************************
-FUNCTION:datadeal_proto_pack
-Description:pack data by use protobuf
-Arguments:
-[stp_unpack_buf][IN]：store origin data
-[cp_pack_buf][OUT]：store data be packed
-return:success return the size of pack data, fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION            :datadeal_proto_pack()
+* Description         :Encode data with protobuf protocol
+* Arguments           :
+* [stp_unpack_buf][IN]:Point to the memory where the original 
+*                      data is stored
+* [cp_pack_buf][OUT]  :Save the packaged data
+* return              :Returns the size of the packed data
 ************************************************************/
 int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 {
@@ -1312,12 +1323,13 @@ int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
 }
 
 /************************************************************
-FUNCTION:datadeal_proto_unpack()
-Description:protobuf协议解码
-Arguments:
-[cp_pack_buf][IN]：待解包的数据
-[stp_unpack_buf][OUT]:存放解包之后的数据
-return:success return FILEDATA_DEAL_RET_OK and fail return FILEDATA_DEAL_RET_FAIL
+* FUNCTION             :datadeal_proto_unpack()
+* Description          :Decode data with protobuf protocol
+* Arguments:
+* [cp_pack_buf][IN]    :Data to be unpacked
+* [stp_unpack_buf][OUT]:Store the unpacked data
+* return               :success return FILEDATA_DEAL_RET_OK 
+*                       and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size)
 {
