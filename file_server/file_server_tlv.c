@@ -53,14 +53,15 @@ int read_int(unsigned     int *data, char **p_src, char * cp_end_data)
 
 
 /************************************************************
-FUNCTION:tlv_encode_file()
-Description:use tlv pack data
-Arguments:
-[stp_file_data][IN]：Point to data to be packaged
-[cp_buf][OUT]:Storage of packaged data  
-[uip_tlv_totol_len][OUT]:the size of being packaged data  
-[ui_buf_len][IN]：the size of cp_buf
-return:success return TLV_ENCODE_RET_OK, fail return TLV_ENCODE_RET_FAIL
+* FUNCTION                :tlv_encode_file()
+* Description             :use tlv pack data
+* Arguments               :
+* [stp_file_data][IN]     :Point to data to be packaged
+* [cp_buf][OUT]           :Storage of packaged data  
+* [uip_tlv_totol_len][OUT]:the size of being packaged data  
+* [ui_buf_len][IN]        ：the size of cp_buf
+* return                  :success return TLV_ENCODE_RET_OK, 
+*                          fail return TLV_ENCODE_RET_FAIL
 ************************************************************/
 int tlv_encode_file(FILE_DATA_STP stp_file_data, char *cp_buf, unsigned int *uip_tlv_totol_len, unsigned int ui_buf_len)
 {
@@ -102,13 +103,14 @@ int tlv_encode_file(FILE_DATA_STP stp_file_data, char *cp_buf, unsigned int *uip
 
 
 /************************************************************
-FUNCTION:tlv_decode_file()
-Description:unpack the tlv data
-Arguments:
-[stp_file_data][OUT]：Storage of unpackaged data 
-[cp_buf][IN]:Storage of to be unpackaged data  
-[uip_tlv_totol_len][IN]:the size of being packaged data  
-return:success return TLV_DECODE_RET_OK, fail return TLV_DECODE_RET_FAIL
+* FUNCTION               :tlv_decode_file()
+* Description            :unpack the tlv data
+* Arguments:
+* [stp_file_data][OUT]   ：Storage of unpackaged data 
+* [cp_buf][IN]:Storage of to be unpackaged data  
+* [uip_tlv_totol_len][IN]:the size of being packaged data  
+* return                 :success return TLV_DECODE_RET_OK, 
+*                         fail return TLV_DECODE_RET_FAIL
 ************************************************************/
 int tlv_decode_file(char *cp_buf, unsigned int ui_tlv_totol_len, FILE_DATA_STP stp_file_data)
 {

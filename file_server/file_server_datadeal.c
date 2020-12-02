@@ -19,8 +19,8 @@
 
 #define BUFSIZE 1024
 
-TEST_HDR_T g_st_test_hdr;    //全局数据头部
-TEST_HDR_T *g_stp_test_hdr;   //全局数据头部指针
+TEST_HDR_T g_stTestHdr;     //Global data header
+TEST_HDR_T *g_stpTestHdr;   //Global data header pointer
 
 
 int datadeal_proto_pack(FILEDATA *cp_unpack_buf, char **cp_pack_buf);
@@ -31,59 +31,61 @@ int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes);
 
 
 /************************************************************
-FUNCTION:datadeal_get_hdr()
-Description:该函数主要用来读取g_st_test_hdr全局变量的值
-Arguments:无
-return:返回g_st_test_hdr
+* FUNCTION   :datadeal_get_hdr()
+* Description:get value of g_stTestHdr 
+* Arguments  :none
+* return     :return g_stTestHdr
 ************************************************************/
 TEST_HDR_T datadeal_get_hdr(void)
 {
-    return g_st_test_hdr;
+    return g_stTestHdr;
 }
 
 /************************************************************
-FUNCTION:datadeal_get_phdr()
-Description:该函数主要用来读取g_st_test_hdr全局变量的地址
-Arguments:无
-return:返回g_st_test_hdr address
+* FUNCTION   :datadeal_get_phdr()
+* Description:get address value of g_stTestHdr  
+* Arguments  :none
+* return     :return g_st_test_hdr address
 ************************************************************/
 TEST_HDR_T * datadeal_get_phdr(void)
 {
-    return &g_st_test_hdr;
+    return &g_stTestHdr;
 }
 
 
-/************************************************************
-FUNCTION:datadeal_set_hdr()
-Description:该函数主要用来文件间设置全局变量g_st_test_hdr
-Arguments:
-[pst_test_hdr][IN]：指向一个TEST_HDR_T结构，存放有待设置的数据
-[en_flg][IN]：设置标志位
-return:返回g_st_test_hdr
-************************************************************/
+/*******************************************************************
+* FUNCTION          :datadeal_set_hdr()
+* Description       :Set global variable g_stTestHdr between modules
+* Arguments         :
+* [pst_test_hdr][IN]:Point to a TEST_HDR_T structure to store the 
+*                    data to be set
+* [en_flg][IN]      :Set the en_flg
+* return            :success return FILEDATA_DEAL_RET_OK, return 
+*                    FILEDATA_DEAL_RET_FAIL
+*******************************************************************/
 int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 {
     assert(NULL != pst_test_hdr);
 
     if (en_flg == HDR_FIELD_VERSION)
     {
-        g_st_test_hdr.en_version = pst_test_hdr->en_version;   
+        g_stTestHdr.en_version = pst_test_hdr->en_version;   
     }
     else if (en_flg == HDR_FIELD_HDR_LEN)
     {
-        g_st_test_hdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
+        g_stTestHdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
     }
     else if (en_flg == HDR_FIELD_DATA_LEN)
     {
-        g_st_test_hdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
+        g_stTestHdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
     }
     else if (en_flg == HDR_FIELD_MODULE)
     {
-        g_st_test_hdr.en_module = pst_test_hdr->en_module;   
+        g_stTestHdr.en_module = pst_test_hdr->en_module;   
     }
     else if (en_flg == HDR_FIELD_CMD)
     {
-        g_st_test_hdr.en_cmd = pst_test_hdr->en_cmd;   
+        g_stTestHdr.en_cmd = pst_test_hdr->en_cmd;   
     }
     else
     {
@@ -295,14 +297,14 @@ int datadeal_file_list(int i_connect_fd)
     int i_send_bytes = 0;
     char c_end_buf_a[BUFSIZE];
     
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
 
-        char c_pack_buf_a[g_st_test_hdr.ui_dat_len + 1];
+        char c_pack_buf_a[g_stTestHdr.ui_dat_len + 1];
         FILEDATA st_unpack_buf;
     
         /*recv cmd data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -315,13 +317,13 @@ int datadeal_file_list(int i_connect_fd)
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
         file_printf("c_pack_buf_a size = %d\n", sizeof(c_pack_buf_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         }   
         
         /*unpack the cmd data*/
         memset(&st_unpack_buf, 0, sizeof(st_unpack_buf));
-        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_st_test_hdr.ui_dat_len);
+        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_stTestHdr.ui_dat_len);
         if (i_ret == FILEDATA_DEAL_RET_FAIL) {
             file_error("[%s]datadeal_proto_unpack is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
@@ -361,15 +363,15 @@ int datadeal_file_list(int i_connect_fd)
             file_error("[%s]server_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;   
         }   
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
     
         cJSON * stp_json = NULL;  
         cJSON * stp_json_str_cmd = NULL; 
-        char c_cjson_out_data_a[g_st_test_hdr.ui_dat_len];
+        char c_cjson_out_data_a[g_stTestHdr.ui_dat_len];
 
         /*recv cmd data from client*/
         memset(c_cjson_out_data_a, 0, sizeof(c_cjson_out_data_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -382,7 +384,7 @@ int datadeal_file_list(int i_connect_fd)
         
         file_printf("c_cjson_out_data_a = %s\n", c_cjson_out_data_a);
         file_printf("c_cjson_out_data_a size = %d\n", sizeof(c_cjson_out_data_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_cjson_out_data_a[i]);
         } 
 
@@ -430,14 +432,14 @@ int datadeal_file_list(int i_connect_fd)
         }
         
         cJSON_Delete(stp_json);     
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         char c_pack_buf_a[BUFSIZE];
         FILE_DATA_ST st_file_data;
         int i_ret = TLV_DECODE_RET_OK;
 
         /*recv cmd data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -449,14 +451,14 @@ int datadeal_file_list(int i_connect_fd)
         }
         
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         } 
 
         /*tlv decode the cmd of "L" pack data*/
         memset(&st_file_data, 0, sizeof(st_file_data));
-        i_ret = tlv_decode_file(c_pack_buf_a, g_st_test_hdr.ui_dat_len, &st_file_data);
+        i_ret = tlv_decode_file(c_pack_buf_a, g_stTestHdr.ui_dat_len, &st_file_data);
         if (TLV_DECODE_RET_FAIL == i_ret) {
             file_error("[%s]tlv_decode_file is fail!\n", __FUNCTION__);  
             return FILEDATA_DEAL_RET_FAIL;
@@ -562,16 +564,16 @@ int datadeal_file_get(int i_connect_fd)
     struct stat st_file_info;
     ssize_t sst_read_bytes = 0;
 
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
 
-        char c_pack_buf_a[g_st_test_hdr.ui_dat_len + 1];
+        char c_pack_buf_a[g_stTestHdr.ui_dat_len + 1];
         char *cp_pack_buf = NULL;
         FILEDATA st_unpack_buf;
         int i_pack_len = 0;
         
         /*recv pack data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -579,7 +581,7 @@ int datadeal_file_get(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -589,13 +591,13 @@ int datadeal_file_get(int i_connect_fd)
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
         file_printf("c_pack_buf_a size = %d\n", sizeof(c_pack_buf_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         }   
         
         /*unpack the pack data*/
         memset(&st_unpack_buf, 0, sizeof(st_unpack_buf));
-        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_st_test_hdr.ui_dat_len);
+        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_stTestHdr.ui_dat_len);
         if (i_ret == FILEDATA_DEAL_RET_FAIL) {
             file_error("[%s]datadeal_proto_unpack is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
@@ -670,12 +672,12 @@ int datadeal_file_get(int i_connect_fd)
             st_unpack_buf.p_filename_buf = NULL;
         }
 
-        /*pading the g_st_test_hdr structure*/
-        memset(&g_st_test_hdr, 0, sizeof(g_st_test_hdr));
-        g_st_test_hdr.ui_dat_len = i_pack_len;
+        /*pading the g_stTestHdr structure*/
+        memset(&g_stTestHdr, 0, sizeof(g_stTestHdr));
+        g_stTestHdr.ui_dat_len = i_pack_len;
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_SERVER_ERROR) {
             file_error("[%s]server_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -690,8 +692,8 @@ int datadeal_file_get(int i_connect_fd)
         }
         file_printf("server_send_data send protobuf pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_pack_buf[i]);
         }
         
@@ -700,16 +702,16 @@ int datadeal_file_get(int i_connect_fd)
             cp_pack_buf = NULL;
         }
         close(i_file_fd);
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
         
         cJSON * stp_json = NULL;  
         cJSON * stp_json_str_cmd = NULL; 
         cJSON * stp_json_str_filename = NULL; 
-        char c_cjson_out_data_a[g_st_test_hdr.ui_dat_len];
+        char c_cjson_out_data_a[g_stTestHdr.ui_dat_len];
 
         /*recv json pack data from client*/
         memset(c_cjson_out_data_a, 0, sizeof(c_cjson_out_data_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -717,7 +719,7 @@ int datadeal_file_get(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -727,7 +729,7 @@ int datadeal_file_get(int i_connect_fd)
 
         file_printf("c_cjson_out_data_a = %s\n", c_cjson_out_data_a);
         file_printf("c_cjson_out_data_a size = %d\n", sizeof(c_cjson_out_data_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_cjson_out_data_a[i]);
         }   
 
@@ -823,13 +825,13 @@ int datadeal_file_get(int i_connect_fd)
         /*judge the data size of bytes*/
         i_cjson_data_size = strlen(cp_cjson_data_out);
 
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = i_cjson_data_size + 1;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_SERVER_ERROR) {
             file_error("[%s]server_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -845,8 +847,8 @@ int datadeal_file_get(int i_connect_fd)
 
         file_printf("server_send_data send cjson pack data %d bytes\n", i_send_bytes);
         file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", cp_cjson_data_out[i]);
         }
 
@@ -866,7 +868,7 @@ int datadeal_file_get(int i_connect_fd)
             free(stp_json);
             stp_json = NULL;
         }  
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         char c_pack_buf_a[BUFSIZE];
         FILE_DATA_ST st_file_data;
         int i_ret = TLV_DECODE_RET_OK;
@@ -874,7 +876,7 @@ int datadeal_file_get(int i_connect_fd)
 
         /*recv tlv pack data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -882,7 +884,7 @@ int datadeal_file_get(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -891,14 +893,14 @@ int datadeal_file_get(int i_connect_fd)
         }
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         } 
 
         /*decode the tlv pack data*/
         memset(&st_file_data, 0, sizeof(st_file_data));
-        i_ret = tlv_decode_file(c_pack_buf_a, g_st_test_hdr.ui_dat_len, &st_file_data);
+        i_ret = tlv_decode_file(c_pack_buf_a, g_stTestHdr.ui_dat_len, &st_file_data);
         if (TLV_DECODE_RET_FAIL == i_ret) {
             file_error("[%s]tlv_decode_file is fail!\n", __FUNCTION__);  
             return FILEDATA_DEAL_RET_FAIL;
@@ -959,13 +961,13 @@ int datadeal_file_get(int i_connect_fd)
             return FILEDATA_DEAL_RET_FAIL;
         }
         
-        /*pading the g_st_test_hdr structure*/
-        g_st_test_hdr.en_version = VERSION_ONE;
-        g_st_test_hdr.ui_dat_len = ui_tlv_totol_len;
-        g_st_test_hdr.us_hdr_len = sizeof(g_st_test_hdr);
+        /*pading the g_stTestHdr structure*/
+        g_stTestHdr.en_version = VERSION_ONE;
+        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
+        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
 
-        /*sned the g_st_test_hdr*/
-        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_st_test_hdr, sizeof(g_st_test_hdr));
+        /*sned the g_stTestHdr*/
+        i_send_bytes = server_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
         if (i_ret == FILE_SERVER_ERROR) {
             file_error("[%s]server_send_data is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -981,8 +983,8 @@ int datadeal_file_get(int i_connect_fd)
 
         file_printf("server_send_data send tlv pack data %d bytes\n", i_send_bytes);
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%hhX\n", c_pack_buf_a[i]);
         }
 
@@ -1013,14 +1015,14 @@ int datadeal_file_set(int i_connect_fd)
     int i_file_fd = 0;
     ssize_t sst_write_bytes = 0;
     
-    if (g_st_test_hdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
 
-        char c_pack_buf_a[g_st_test_hdr.ui_dat_len + 1];
+        char c_pack_buf_a[g_stTestHdr.ui_dat_len + 1];
         FILEDATA st_unpack_buf;
     
         /*recv pack data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1028,7 +1030,7 @@ int datadeal_file_set(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -1038,13 +1040,13 @@ int datadeal_file_set(int i_connect_fd)
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
         file_printf("c_pack_buf_a size = %d\n", sizeof(c_pack_buf_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         }   
         
         /*unpack the pack data*/
         memset(&st_unpack_buf, 0, sizeof(st_unpack_buf));
-        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_st_test_hdr.ui_dat_len);
+        i_ret = datadeal_proto_unpack(c_pack_buf_a, &st_unpack_buf, g_stTestHdr.ui_dat_len);
         if (i_ret == FILEDATA_DEAL_RET_FAIL) {
             file_error("[%s]datadeal_proto_unpack is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
@@ -1109,18 +1111,18 @@ int datadeal_file_set(int i_connect_fd)
             free(st_unpack_buf.p_filedata_buf);    
         }
         close(i_file_fd);
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_JSON) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
 
         cJSON * stp_json = NULL;  
         cJSON * stp_json_str_cmd = NULL; 
         cJSON * stp_json_str_filename = NULL; 
         cJSON * stp_json_str_filedata = NULL; 
         cJSON * stp_json_num_filesize = NULL; 
-        char c_cjson_out_data_a[g_st_test_hdr.ui_dat_len];  
+        char c_cjson_out_data_a[g_stTestHdr.ui_dat_len];  
 
         /*recv json pack data from client*/
         memset(c_cjson_out_data_a, 0, sizeof(c_cjson_out_data_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_cjson_out_data_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1128,7 +1130,7 @@ int datadeal_file_set(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -1138,7 +1140,7 @@ int datadeal_file_set(int i_connect_fd)
 
         file_printf("c_cjson_out_data_a = %s\n", c_cjson_out_data_a);
         file_printf("c_cjson_out_data_a size = %d\n", sizeof(c_cjson_out_data_a));
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_cjson_out_data_a[i]);
         } 
 
@@ -1236,14 +1238,14 @@ int datadeal_file_set(int i_connect_fd)
         cJSON_Delete(stp_json); 
         close(i_file_fd);
             
-    } else if (g_st_test_hdr.en_module == MODULE_TEST_TLV) {
+    } else if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
         char c_pack_buf_a[BUFSIZE];
         FILE_DATA_ST st_file_data;
         int i_ret = TLV_DECODE_RET_OK;
 
         /*recv tlv pack data from client*/
         memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_st_test_hdr.ui_dat_len); 
+        i_recv_data_bytes = server_recv_data(i_connect_fd, (char *)c_pack_buf_a, g_stTestHdr.ui_dat_len); 
         if (i_recv_data_bytes == FILE_SERVER_ERROR) {
             file_error("[%s]server_recv_data is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
@@ -1251,7 +1253,7 @@ int datadeal_file_set(int i_connect_fd)
             file_running("[%s]client close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != g_st_test_hdr.ui_dat_len) {
+            if (i_recv_data_bytes != g_stTestHdr.ui_dat_len) {
                 file_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
@@ -1260,21 +1262,21 @@ int datadeal_file_set(int i_connect_fd)
         }
 
         file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("c_pack_buf_a size = %d\n", g_st_test_hdr.ui_dat_len);
-        for (int i = 0; i < g_st_test_hdr.ui_dat_len; i++) {
+        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
+        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
             file_printf("%X\n", c_pack_buf_a[i]);
         } 
 
         /*tlv decode the cmd of pack data*/
         memset(&st_file_data, 0, sizeof(st_file_data));
-        st_file_data.cp_file_content = (char *)malloc(g_st_test_hdr.ui_dat_len);
+        st_file_data.cp_file_content = (char *)malloc(g_stTestHdr.ui_dat_len);
         if (NULL == st_file_data.cp_file_content) {
             perror("malloc");
             file_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        i_ret = tlv_decode_file(c_pack_buf_a, g_st_test_hdr.ui_dat_len, &st_file_data);
+        i_ret = tlv_decode_file(c_pack_buf_a, g_stTestHdr.ui_dat_len, &st_file_data);
         if (TLV_DECODE_RET_FAIL == i_ret) {
             file_error("[%s]tlv_decode_file is fail!\n", __FUNCTION__);  
             return FILEDATA_DEAL_RET_FAIL;
