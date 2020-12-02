@@ -19,7 +19,7 @@
 
 #define BUFSIZE 1024
 
-TEST_HDR_T g_stTestHdr;    //全局数据头部
+TEST_HDR_T g_stTestHdr;    //Global data header
 
 int datadeal_proto_pack(FILEDATA *cp_unpack_buf, char **cp_pack_buf);
 int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size);
