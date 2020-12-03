@@ -7,152 +7,152 @@
 #include "file_server_tlv.h"
 #include "file_server_debug.h"
 
-int write_block(char ** p_dst, unsigned int ui_write_len, void * p_src, char *cp_end_data)
+int writeBlock(char** pDst, unsigned int uiWriteLen, void* pSrc, char*pcEndData)
 {
-    memcpy(*p_dst, p_src, ui_write_len);
-    *p_dst += ui_write_len;
+    memcpy(*pDst, pSrc, uiWriteLen);
+    *pDst += uiWriteLen;
 
-    return (*p_dst <= cp_end_data) ? TLV_ENCODE_RET_OK: TLV_ENCODE_RET_FAIL;
+    return (*pDst <= pcEndData) ? TLV_ENCODE_RET_OK: TLV_ENCODE_RET_FAIL;
 }
-int write_int(unsigned int data, char **p_dst, char *cp_end_data)
+int writeInt(unsigned int uiData, char** pDst, char* pcEndData)
 {
-    unsigned int i_net_data = htonl(data);
+    unsigned int i_net_data = htonl(uiData);
     
-    int i_ret = TLV_ENCODE_RET_OK;
+    int iRet = TLV_ENCODE_RET_OK;
     
-    i_ret = write_block(p_dst, sizeof(int), &i_net_data, cp_end_data);
-    if (TLV_ENCODE_RET_FAIL == i_ret) {
-        file_error("[%s]write_block over lap!\n", __FUNCTION__);
+    iRet = writeBlock(pDst, sizeof(int), &i_net_data, pcEndData);
+    if (TLV_ENCODE_RET_FAIL == iRet) {
+        File_error("[%s]writeBlock over lap!\n", __FUNCTION__);
         return TLV_ENCODE_RET_FAIL;
     }
 
     return TLV_ENCODE_RET_OK;
 }
 
-int read_block(void * p_dst, char ** p_src, unsigned int ui_len, char *cp_end_data)
+int readBlock(void* pDst, char** pSrc, unsigned int uiLen, char* pcEndData)
 {
-    memcpy(p_dst, *p_src, ui_len);
-    *p_src += ui_len;
+    memcpy(pDst, *pSrc, uiLen);
+    *pSrc += uiLen;
 
-    return (*p_src <= cp_end_data) ? TLV_DECODE_RET_OK : TLV_DECODE_RET_FAIL;
+    return (*pSrc <= pcEndData) ? TLV_DECODE_RET_OK : TLV_DECODE_RET_FAIL;
 }
-int read_int(unsigned     int *data, char **p_src, char * cp_end_data)
+int readInt(unsigned     int* uiData, char** pSrc, char* pcEndData)
 {   
-    int i_ret = TLV_DECODE_RET_OK;
+    int iRet = TLV_DECODE_RET_OK;
 
-    i_ret = read_block(data, p_src, sizeof(int), cp_end_data);
-    if (TLV_DECODE_RET_FAIL == i_ret) {
-        file_error("[%s]read_block over lap!\n", __FUNCTION__);
+    iRet = readBlock(uiData, pSrc, sizeof(int), pcEndData);
+    if (TLV_DECODE_RET_FAIL == iRet) {
+        File_error("[%s]readBlock over lap!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
 
-    *data = ntohl(*data);
+    *uiData = ntohl(*uiData);
 
     return TLV_DECODE_RET_OK;
 }
 
 
 /************************************************************
-* FUNCTION                :tlv_encode_file()
-* Description             :use tlv pack data
+* FUNCTION                :tlvEncodeFile()
+* Description             :use tlv pack uiData
 * Arguments               :
-* [stp_file_data][IN]     :Point to data to be packaged
-* [cp_buf][OUT]           :Storage of packaged data  
-* [uip_tlv_totol_len][OUT]:the size of being packaged data  
-* [ui_buf_len][IN]        ：the size of cp_buf
+* [pstFileData][IN]     :Point to uiData to be packaged
+* [pcBuf][OUT]           :Storage of packaged uiData  
+* [puiTlvTotolLen][OUT]:the size of being packaged uiData  
+* [uiBufLen][IN]        ：the size of pcBuf
 * return                  :success return TLV_ENCODE_RET_OK, 
 *                          fail return TLV_ENCODE_RET_FAIL
 ************************************************************/
-int tlv_encode_file(FILE_DATA_STP stp_file_data, char *cp_buf, unsigned int *uip_tlv_totol_len, unsigned int ui_buf_len)
+int tlvEncodeFile(FileData_Sp pstFileData, char* pcBuf, unsigned int* puiTlvTotolLen, unsigned int uiBufLen)
 {
-    assert(NULL != stp_file_data);
-    assert(NULL != cp_buf);
-    assert(NULL != uip_tlv_totol_len);
+    assert(NULL != pstFileData);
+    assert(NULL != pcBuf);
+    assert(NULL != puiTlvTotolLen);
 
-    char * cp_write_data = cp_buf;
-    char * cp_end_data = cp_buf + ui_buf_len;
+    char* pcWriteData = pcBuf;
+    char* pcEndData = pcBuf + uiBufLen;
 
     /*write the root node*/
-    write_int(TLV_FILE_ROOT, &cp_write_data, cp_end_data);
-    write_int(32 + stp_file_data->ui_data_totol_size, &cp_write_data, cp_end_data);
+    writeInt(TLV_FILE_ROOT, &pcWriteData, pcEndData);
+    writeInt(32 + pstFileData->m_uiDataTotolSize, &pcWriteData, pcEndData);
 
     /*construct the cmd node*/
-    write_int(TLV_FILE_CMD, &cp_write_data, cp_end_data);
-    write_int(12, &cp_write_data, cp_end_data);
-    write_block(&cp_write_data, sizeof(stp_file_data->c_file_cmd), stp_file_data->c_file_cmd, cp_end_data);
+    writeInt(TLV_FILE_CMD, &pcWriteData, pcEndData);
+    writeInt(12, &pcWriteData, pcEndData);
+    writeBlock(&pcWriteData, sizeof(pstFileData->m_cFileCmd), pstFileData->m_cFileCmd, pcEndData);
 
     /*construct the file name node*/
-    write_int(TLV_FILE_NAME, &cp_write_data, cp_end_data);
-    write_int(12, &cp_write_data, cp_end_data);
-    write_block(&cp_write_data, sizeof(stp_file_data->c_file_name), stp_file_data->c_file_name, cp_end_data);
+    writeInt(TLV_FILE_NAME, &pcWriteData, pcEndData);
+    writeInt(12, &pcWriteData, pcEndData);
+    writeBlock(&pcWriteData, sizeof(pstFileData->m_cFileName), pstFileData->m_cFileName, pcEndData);
 
     /*construct the file content node*/
-    write_int(TLV_FILE_CONTENT, &cp_write_data, cp_end_data);
-    write_int(stp_file_data->ui_file_size, &cp_write_data, cp_end_data);
-    write_block(&cp_write_data, stp_file_data->ui_file_size, stp_file_data->cp_file_content, cp_end_data);
+    writeInt(TLV_FILE_CONTENT, &pcWriteData, pcEndData);
+    writeInt(pstFileData->m_uiFileSize, &pcWriteData, pcEndData);
+    writeBlock(&pcWriteData, pstFileData->m_uiFileSize, pstFileData->m_pcFileContent, pcEndData);
 
     /*construct the file size node*/
-    write_int(TLV_FILE_SIZE, &cp_write_data, cp_end_data);
-    write_int(4, &cp_write_data, cp_end_data);
-    write_int(stp_file_data->ui_file_size, &cp_write_data, cp_end_data);    
+    writeInt(TLV_FILE_SIZE, &pcWriteData, pcEndData);
+    writeInt(4, &pcWriteData, pcEndData);
+    writeInt(pstFileData->m_uiFileSize, &pcWriteData, pcEndData);    
 
-    *uip_tlv_totol_len = 32 + stp_file_data->ui_data_totol_size + 8;
+    *puiTlvTotolLen = 32 + pstFileData->m_uiDataTotolSize + 8;
 
     return TLV_ENCODE_RET_OK;
 }
 
 
 /************************************************************
-* FUNCTION               :tlv_decode_file()
-* Description            :unpack the tlv data
+* FUNCTION               :tlvDecodeFile()
+* Description            :unpack the tlv uiData
 * Arguments:
-* [stp_file_data][OUT]   ：Storage of unpackaged data 
-* [cp_buf][IN]:Storage of to be unpackaged data  
-* [uip_tlv_totol_len][IN]:the size of being packaged data  
+* [pstFileData][OUT]   ：Storage of unpackaged uiData 
+* [pcBuf][IN]:Storage of to be unpackaged uiData  
+* [puiTlvTotolLen][IN]:the size of being packaged uiData  
 * return                 :success return TLV_DECODE_RET_OK, 
 *                         fail return TLV_DECODE_RET_FAIL
 ************************************************************/
-int tlv_decode_file(char *cp_buf, unsigned int ui_tlv_totol_len, FILE_DATA_STP stp_file_data)
+int tlvDecodeFile(char* pcBuf, unsigned int uiTlvTotolLen, FileData_Sp pstFileData)
 {
-    assert(NULL != stp_file_data);
-    assert(NULL != cp_buf);
+    assert(NULL != pstFileData);
+    assert(NULL != pcBuf);
 
-    char * cp_read_data = cp_buf;
-    char * cp_end_data = cp_buf + ui_tlv_totol_len;
-    FILE_TEST_EN en_tlv_type = TLV_FILE_NONE;
-    unsigned int ui_tlv_len_sum = 0;
-    unsigned int ui_tlv_len = 0;
+    char* pcReadData = pcBuf;
+    char* pcEndData = pcBuf + uiTlvTotolLen;
+    FILE_TEST_EN enTlvType = TLV_FILE_NONE;
+    unsigned int uiTlvLenSum = 0;
+    unsigned int uiTlvLen = 0;
 
-    read_int(&en_tlv_type, &cp_read_data, cp_end_data);
-    if (TLV_FILE_ROOT != en_tlv_type) {
-        file_error("[%s]read TLV_FILE_ROOT is fail!\n", __FUNCTION__);
+    readInt(&enTlvType, &pcReadData, pcEndData);
+    if (TLV_FILE_ROOT != enTlvType) {
+        File_error("[%s]read TLV_FILE_ROOT is fail!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
     
-    read_int(&ui_tlv_len_sum, &cp_read_data, cp_end_data);
+    readInt(&uiTlvLenSum, &pcReadData, pcEndData);
 
-    while (ui_tlv_len_sum > 0) {
-        read_int(&en_tlv_type, &cp_read_data, cp_end_data);
-        read_int(&ui_tlv_len, &cp_read_data, cp_end_data);
-        switch (en_tlv_type) {
+    while (uiTlvLenSum > 0) {
+        readInt(&enTlvType, &pcReadData, pcEndData);
+        readInt(&uiTlvLen, &pcReadData, pcEndData);
+        switch (enTlvType) {
             case TLV_FILE_CMD:          
-                read_block(stp_file_data->c_file_cmd, &cp_read_data,  ui_tlv_len, cp_end_data);
-                ui_tlv_len_sum = ui_tlv_len_sum - (8 + ui_tlv_len);
+                readBlock(pstFileData->m_cFileCmd, &pcReadData,  uiTlvLen, pcEndData);
+                uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);
                 break;
             case TLV_FILE_NAME:
-                read_block(stp_file_data->c_file_name, &cp_read_data, ui_tlv_len, cp_end_data);
-                ui_tlv_len_sum = ui_tlv_len_sum - (8 + ui_tlv_len);
+                readBlock(pstFileData->m_cFileName, &pcReadData, uiTlvLen, pcEndData);
+                uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);
                 break;
             case TLV_FILE_CONTENT:
-                read_block(stp_file_data->cp_file_content, &cp_read_data, ui_tlv_len, cp_end_data);
-                ui_tlv_len_sum = ui_tlv_len_sum - (8 + ui_tlv_len);
+                readBlock(pstFileData->m_pcFileContent, &pcReadData, uiTlvLen, pcEndData);
+                uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);
                 break;
             case TLV_FILE_SIZE:
-                read_int(&stp_file_data->ui_file_size, &cp_read_data, cp_end_data);
-                ui_tlv_len_sum = ui_tlv_len_sum - (8 + ui_tlv_len);
+                readInt(&pstFileData->m_uiFileSize, &pcReadData, pcEndData);
+                uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);
                 break;
             default:
-                file_error("[%s]tlv decode is fail!\n", __FUNCTION__);
+                File_error("[%s]tlv decode is fail!\n", __FUNCTION__);
                 break;      
         }
     }

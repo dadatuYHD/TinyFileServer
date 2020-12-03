@@ -6,14 +6,14 @@
 #define FILE_SERVER_RECV_PEER_DOWN 1
 
 
-typedef struct sockaddr SA;
-typedef struct sockaddr_in SA_I;
+typedef struct sockaddr SA_S;
+typedef struct sockaddr_in SAI_S;
 
-int server_init_socket(int iPort);
-int server_deal_client_request(void);
-int server_get_listenfd(void);
-int server_recv_data(int i_connect_fd, void *p_buf, int i_bufsize);
-int server_send_data(int i_connect_fd, void *p_buf, int i_bufsize);
+int Server_initSocket(int iPort);
+int Server_dealClientReq(void);
+int Server_getListenFd(void);
+int Server_recvData(int iConnectFd, void* pBuf, int iBufSize);
+int server_sendData(int iConnectFd, void* pBuf, int iBufSize);
 
 
 

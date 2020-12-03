@@ -2,7 +2,7 @@
 *   Copyright (C) 2017 All rights reserved.
 *
 *   Filename:file_client_input.c
-*   Author  :叶鸿达
+*   Author  :yhd
 *   Date    :2017-11-24
 *   Describe:文件服务器输入相关函数
 *
@@ -18,20 +18,19 @@
 
 #define BUFSIZE 128
 
-int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, 
-                                                           char * pcInputBuf);
-int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf);
+int File_atoi(unsigned int* puiInputInt, char* pcInputBuf);
+int File_intFromBuf(unsigned int* puiInputInt, char* pcInputBuf);
 
 
 
 
 
 /***************************************************************************
-* FUNCTION             :file_input_int()
+* FUNCTION             :File_inputInt()
 * Description          :Processing of arithmetic integer 
 *                       string numbers from standard input
 * Arguments            :
-* Arg1[uipInputInt][In]:A pointer to temporarily store the 
+* Arg1[puiInputInt][In]:A pointer to temporarily store the 
 *                       address of the string number 
 *                       successfully converted into an integer
 * return               :Successfully return FILEINPUT_RET_OK, 
@@ -41,25 +40,25 @@ int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf);
 *                       return FILEINPUT_RET_FAIL_INPUT_OUTOFRANGE，error 
 *                       return FILEINPUT_RET_FAIL
 ***************************************************************************/
-int file_input_int(unsigned int * uipInputInt)
+int File_inputInt(unsigned int* puiInputInt)
 {
     unsigned int iRet = FILEINPUT_RET_OK;
-    char cInputBuf_a[BUFSIZE];
+    char cInputBuf[BUFSIZE];
 
     /*read number string from standerd input*/
-    memset(cInputBuf_a, 0, sizeof(cInputBuf_a));
-    iRet = file_input_string(cInputBuf_a);
+    memset(cInputBuf, 0, sizeof(cInputBuf));
+    iRet = File_inputString(cInputBuf);
     if (iRet == FILEINPUT_RET_FAIL)
     {
-        file_error("[%s]String Input is fail!\n", __FUNCTION__);
+        File_error("[%s]String Input is fail!\n", __FUNCTION__);
         return FILEINPUT_RET_FAIL;
     }
 
     /*check number string is valid and convert to the integer number*/
-    iRet = file_input_intfrombuf(uipInputInt, cInputBuf_a);
+    iRet = File_intFromBuf(puiInputInt, cInputBuf);
     if (iRet == FILEINPUT_RET_FAIL)
     {
-        file_error("[%s]Input number is invalid!\n", __FUNCTION__);
+        File_error("[%s]Input number is invalid!\n", __FUNCTION__);
         return FILEINPUT_RET_INPUT_INVALID;
     }
 
@@ -68,7 +67,7 @@ int file_input_int(unsigned int * uipInputInt)
 
 
 /************************************************************
-* FUNCTION            :file_input_string()
+* FUNCTION            :File_inputString()
 * Description         :This function is mainly used to read 
 *                      strings from standard input
 * Arguments           :
@@ -77,7 +76,7 @@ int file_input_int(unsigned int * uipInputInt)
 * return              :Successfully return FILEINPUT_RET_OK, 
 *                      error return FILEINPUT_RET_FAIL
 ***********************************************************/
-int file_input_string(char * pcInputBuf)
+int File_inputString(char* pcInputBuf)
 {
     /*read string number to the cc1stNum buffer*/
     memset(pcInputBuf, 0, sizeof(pcInputBuf));
@@ -93,12 +92,12 @@ int file_input_string(char * pcInputBuf)
 }
 
 /***************************************************************
-* FUNCTION              :file_input_intfrombuf()
+* FUNCTION              :File_intFromBuf()
 * Description           :This function converts string numbers 
 *                        into integer numbers and checks whether 
 *                        the input string is reasonable
 * Arguments:
-* Arg1[uipInputInt][Out]:Point to the buf that stores the string 
+* Arg1[puiInputInt][Out]:Point to the pBuf that stores the string 
 *                        number successfully converted into an 
 *                        integer
 * Arg2[pcInputBuf][In]  :Store the address from the standard 
@@ -106,7 +105,7 @@ int file_input_string(char * pcInputBuf)
 * return                :Successfully return FILEINPUT_RET_OK, 
 *                        error return FILEINPUT_RET_FAIL
 ***************************************************************/
-int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf)
+int File_intFromBuf(unsigned int* puiInputInt, char* pcInputBuf)
 {
     int iRet = FILEINPUT_RET_OK;
     
@@ -124,10 +123,10 @@ int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf)
     }
 
     /*string number convert to the integer number*/
-    iRet = file_input_StrNumConvertIntegerNum(uipInputInt, pcInputBuf);
+    iRet = File_atoi(puiInputInt, pcInputBuf);
     if (iRet == FILEINPUT_RET_FAIL)
     {
-        file_error("file_input_StrNumConvertIntegerNum convert is fail!\n");
+        File_error("File_atoi convert is fail!\n");
         return FILEINPUT_RET_FAIL;
     }
 
@@ -136,22 +135,22 @@ int file_input_intfrombuf(unsigned int * uipInputInt, char * pcInputBuf)
 
 
 /****************************************************************************
-* FUNCTION              :file_input_StrNumConvertIntegerNum()
+* FUNCTION              :File_atoi()
 * Description           :Convert string numbers to integer numbers
 * return                :Successfully return FILEINPUT_RET_OK, 
 *                        the input string is no longer in a reasonable range, 
 *                        return FILEINPUT_RET_FAIL_INPUT_OUTOFRANGE，error 
 *                        return FILEINPUT_RET_FAIL
 ****************************************************************************/
-int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, char * pcInputBuf)
+int File_atoi(unsigned int * puiInputInt, char * pcInputBuf)
 {
-    if (NULL == uipInputInt || NULL == pcInputBuf)
+    if (NULL == puiInputInt || NULL == pcInputBuf)
     {
-        file_error("Input parameter is fail!\n");
+        File_error("Input parameter is fail!\n");
         return FILEINPUT_RET_FAIL;
     }
 
-    *uipInputInt  = 0;
+    *puiInputInt  = 0;
     for (int i = 0; i < (strlen(pcInputBuf)); i++)
     {
         if (pcInputBuf[i] < '0' || pcInputBuf[i] > '9')
@@ -160,7 +159,7 @@ int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, char * pcInpu
         }
         else
         {
-            *uipInputInt  = *uipInputInt  * 10 + (pcInputBuf[i] - '0'); 
+            *puiInputInt  = *puiInputInt  * 10 + (pcInputBuf[i] - '0'); 
         }   
     }
 
@@ -172,13 +171,13 @@ int file_input_StrNumConvertIntegerNum(unsigned int * uipInputInt, char * pcInpu
 * Description          :Check whether the converted number 
 *                       is within a reasonable range
 * Arguments            :
-* Arg1[uipInputInt][In]:Store the numbers to be checked
+* Arg1[puiInputInt][In]:Store the numbers to be checked
 * return               :Return FILEINPUT_RET_OK on success, 
 *                       return FILEINPUT_RET_FAIL on failure
 ***********************************************************/
-int file_input_module_numcheck(unsigned int uipInputInt)
+int File_inputModuleNumCheck(unsigned int uiInputInt)
 {
-    if (uipInputInt < 1 || uipInputInt > 3)
+    if (uiInputInt < 1 || uiInputInt > 3)
     {
         return FILEINPUT_RET_FAIL;
     }
@@ -186,9 +185,9 @@ int file_input_module_numcheck(unsigned int uipInputInt)
     return FILEINPUT_RET_OK;
 }
 
-int file_input_cmd_numcheck(unsigned int uipInputInt)
+int File_inputCmdMumCheck(unsigned int uiInputInt)
 {
-    if (uipInputInt < 1 || uipInputInt > 5)
+    if (uiInputInt < 1 || uiInputInt > 5)
     {
         return FILEINPUT_RET_FAIL;
     }
@@ -198,7 +197,7 @@ int file_input_cmd_numcheck(unsigned int uipInputInt)
 
 
 /************************************************************
-* FUNCTION            :file_input_char()
+* FUNCTION            :File_inputChar()
 * Description         :read of operator characters from 
 *                      standard input
 * Arguments           :
@@ -206,11 +205,11 @@ int file_input_cmd_numcheck(unsigned int uipInputInt)
 * return              :Return FILEINPUT_RET_OK on success, 
 *                      return FILEINPUT_RET_FAIL on failure
 ***********************************************************/
-int file_input_char(char * pcOperator)
+int File_inputChar(char* pcOperator)
 {
     if (NULL == pcOperator)
     {
-        file_error("input param null\n");
+        File_error("input param null\n");
         return FILEINPUT_RET_FAIL;
     }
 

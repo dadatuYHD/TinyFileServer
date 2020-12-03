@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     /*major state*/
-    file_state_main();  
+    fileStateMain();  
 
     return 0;
 }

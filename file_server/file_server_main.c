@@ -8,24 +8,25 @@
 int main(int argc, char *argv[])
 {
     int iRet = FILE_SERVER_OK;
+	int i = 0;
 
-    iRet = server_init_socket(SERVER_PORT);
+    iRet = Server_initSocket(SERVER_PORT);
     if (iRet == FILE_SERVER_ERROR) {
-        file_error("init the socket is failed!\n");
+        File_error("init the socket is failed!\n");
         return -1;
     }
 
-    file_running("Tcp Server is listen port 8888:\n");
+    File_running("Tcp Server is listen port 8888:\n");
 
     while (1) {
-        iRet = server_deal_client_request();
+        iRet = Server_dealClientReq();
         if (iRet == FILE_SERVER_ERROR) {
-            file_error("server_deal_client_request is failed!\n");
+            File_error("Server_dealClientReq is failed!\n");
             return -1;    
         }
     }
 
-    close(server_get_listenfd());
+    close(Server_getListenFd());
     return 0;
 }
 

@@ -26,7 +26,7 @@ typedef enum {
 }HDR_FIELD_FLG ;
 
 
-/*Header data exchange format*/
+/*Header uiData exchange format*/
 typedef enum  {
 	MODULE_TEST_PROTO = 0,
 	MODULE_TEST_TLV,
@@ -44,21 +44,21 @@ typedef enum {
 }CMD_E;
 
 /*Data header declaration*/
-typedef struct test_hdr_s {
-	VERSION_E      en_version;     // The header version is tentatively set to one, 
+typedef struct TestHdr_S {
+	VERSION_E      m_enVersion;     // The header version is tentatively set to one, 
 	                               // and needs to be verified after receipt
-	unsigned short us_hdr_len;     // Header length needs to be verified after receipt
-	unsigned int   ui_dat_len;	   // Load data length
-	MODULE_E       en_module;	   // Current business module
-	CMD_E          en_cmd;	       // Command number under the module
-}TEST_HDR_T;
+	unsigned short m_usHdrLen;     // Header length needs to be verified after receipt
+	unsigned int   m_uiDataLen;	   // Load uiData length
+	MODULE_E       m_enModule;	   // Current business module
+	CMD_E          m_enCmd;	       // Command number under the module
+}TestHdr_S;
 
 /*Head processing function declaration*/
-TEST_HDR_T datadeal_get_hdr(void);
-int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg);
-int datadeal_file_get(int i_connect_fd);
-int datadeal_file_set(int i_connect_fd);
-int datadeal_file_list(int i_connect_fd);
-TEST_HDR_T * datadeal_get_phdr(void);
+TestHdr_S DataDeal_getHdr(void);
+int DataDeal_setHdr(TestHdr_S* pstTestHdr, HDR_FIELD_FLG enFlg);
+int DataDeal_getFile(int iConnectFd);
+int DataDeal_setFile(int iConnectFd);
+int datadeal_file_list(int iConnectFd);
+TestHdr_S* DataDeal_getHdrAddress(void);
 
 #endif

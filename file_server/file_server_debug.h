@@ -6,24 +6,24 @@
 #define FILE_ERROR
 
 #ifdef FILE_DEBUG
-#define file_printf(fmt, arg...) printf("[file] "fmt,##arg)
+#define File_printf(fmt, arg...) printf("[file] "fmt,##arg)
 #else
-#define file_printf(a,...) do{}while(0)
+#define File_printf(a,...) do{}while(0)
 #endif
 
 #ifdef FILE_TRACE
-#define file_trace(fmt, arg...) printf("[file][%s][%d][%s]\n",__FUNCTION__,__LINE__, __FILE__)
+#define File_trace(fmt, arg...) printf("[file][%s][%d][%s]\n",__FUNCTION__,__LINE__, __FILE__)
 #else
-#define file_trace(a,...) do{}while(0)
+#define File_trace(a,...) do{}while(0)
 #endif
 
 #ifdef FILE_ERROR
-#define file_error(fmt, arg...) printf("[file][ERROR]"fmt,##arg)
+#define File_error(fmt, arg...) printf("[file][ERROR]"fmt,##arg)
 #else
-#define file_error(a,...) do{}while(0)
+#define File_error(a,...) do{}while(0)
 #endif
 
-#define file_running(fmt, arg...) printf(">> "fmt,##arg)
+#define File_running(fmt, arg...) printf(">> "fmt,##arg)
 
 
 #endif

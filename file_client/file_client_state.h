@@ -12,7 +12,7 @@ typedef enum {
 } FILE_STATE_E;
 
 
-void file_state_main(void);
+void fileStateMain(void);
 
 
 #endif

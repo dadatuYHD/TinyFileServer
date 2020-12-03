@@ -19,31 +19,31 @@
 
 #define BUFSIZE 1024
 
-TEST_HDR_T g_stTestHdr;    //Global data header
+TestHdr_S g_stTestHdr;    //Global uiData header
 
-int datadeal_proto_pack(FILEDATA *cp_unpack_buf, char **cp_pack_buf);
-int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size);
-int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes);
-int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes);
+int DataDeal_protoPack(FILEDATA* pstUnpackBuf, char** pcPackBuf);
+int DataDeal_protoUnpack(char* pcPackBuf, FILEDATA* pstUnpackBuf, int iSize);
+int DataDeal_fileWrite(int iFd, const void* pBuf, ssize_t nBytes);
+int DataDeal_fileRead(int iFd, void* pBuf, ssize_t nBytes);
 
 /************************************************************
-* FUNCTION   :datadeal_get_hdr()
+* FUNCTION   :DataDeal_getHdr()
 * Description:get value of g_stTestHdr 
 * Arguments  :none
 * return     :return g_stTestHdr
 ************************************************************/
-TEST_HDR_T datadeal_get_hdr(void)
+TestHdr_S DataDeal_getHdr(void)
 {
     return g_stTestHdr;
 }
 
 /************************************************************
-* FUNCTION   :datadeal_get_phdr()
+* FUNCTION   :DataDeal_getHdrAddress()
 * Description:get address value of g_stTestHdr  
 * Arguments  :none
 * return     :return g_st_test_hdr address
 ************************************************************/
-TEST_HDR_T * datadeal_get_phdr(void)
+TestHdr_S * DataDeal_getHdrAddress(void)
 {
     return &g_stTestHdr;
 }
@@ -51,31 +51,31 @@ TEST_HDR_T * datadeal_get_phdr(void)
 
 
 /*******************************************************************
-* FUNCTION          :datadeal_set_hdr()
+* FUNCTION          :DataDeal_setHdr()
 * Description       :Set global variable g_stTestHdr between modules
 * Arguments         :
-* [pst_test_hdr][IN]:Point to a TEST_HDR_T structure to store the 
-*                    data to be set
-* [en_flg][IN]      :Set the en_flg
+* [pstTestHdr][IN]:Point to a TestHdr_S structure to store the 
+*                    uiData to be set
+* [enFlg][IN]      :Set the enFlg
 * return            :success return FILEDATA_DEAL_RET_OK, return 
 *                    FILEDATA_DEAL_RET_FAIL
 *******************************************************************/
-int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
+int DataDeal_setHdr(TestHdr_S* pstTestHdr, HDR_FIELD_FLG enFlg)
 {
-    assert(NULL != pst_test_hdr);
+    assert(NULL != pstTestHdr);
         
-    if (en_flg == HDR_FIELD_VERSION) {
-        g_stTestHdr.en_version = pst_test_hdr->en_version;   
-    } else if (en_flg == HDR_FIELD_HDR_LEN) {
-        g_stTestHdr.us_hdr_len = pst_test_hdr->us_hdr_len;   
-    } else if (en_flg == HDR_FIELD_DATA_LEN) {
-        g_stTestHdr.ui_dat_len = pst_test_hdr->ui_dat_len;   
-    } else if (en_flg == HDR_FIELD_MODULE) {
-        g_stTestHdr.en_module = pst_test_hdr->en_module;   
-    } else if (en_flg == HDR_FIELD_CMD) {
-        g_stTestHdr.en_cmd = pst_test_hdr->en_cmd;   
+    if (enFlg == HDR_FIELD_VERSION) {
+        g_stTestHdr.m_enVersion = pstTestHdr->m_enVersion;   
+    } else if (enFlg == HDR_FIELD_HDR_LEN) {
+        g_stTestHdr.m_usHdrLen = pstTestHdr->m_usHdrLen;   
+    } else if (enFlg == HDR_FIELD_DATA_LEN) {
+        g_stTestHdr.m_uiDataLen = pstTestHdr->m_uiDataLen;   
+    } else if (enFlg == HDR_FIELD_MODULE) {
+        g_stTestHdr.m_enModule = pstTestHdr->m_enModule;   
+    } else if (enFlg == HDR_FIELD_CMD) {
+        g_stTestHdr.m_enCmd = pstTestHdr->m_enCmd;   
     } else {
-        file_error("[%s]datadeal_set_hdr input flag is error!\n", __FUNCTION__);
+        File_error("[%s]DataDeal_setHdr input flag is error!\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;   
     }
 
@@ -83,572 +83,572 @@ int datadeal_set_hdr(TEST_HDR_T *pst_test_hdr, HDR_FIELD_FLG en_flg)
 }
 
 /************************************************************
-* FUNCTION    :datadeal_file_read()
+* FUNCTION    :DataDeal_fileRead()
 * Description :Read file contents
 * Arguments   :
-* [i_fd][IN]  :File descriptor
-* [buf][OUT]   :Buf to store the contents of the file
-* [nbytes][IN]:File size to be read
+* [iFd][IN]  :File descriptor
+* [pBuf][OUT]   :Buf to store the contents of the file
+* [nBytes][IN]:File size to be read
 * return      :Returns the total bytes read
 ************************************************************/
-int datadeal_file_read(int i_fd, void * buf, ssize_t nbytes)
+int DataDeal_fileRead(int iFd, void * pBuf, ssize_t nBytes)
 {
-    ssize_t st_total_read_bytes = 0;
-    ssize_t st_read_bytes = 0;
+    ssize_t totalReadBytes = 0;
+    ssize_t readBytes = 0;
 
-    while (st_total_read_bytes < nbytes) {
-        st_read_bytes = read(i_fd, buf, nbytes - st_total_read_bytes); 
-        if (-1 == st_read_bytes) {
+    while (totalReadBytes < nBytes) {
+        readBytes = read(iFd, pBuf, nBytes - totalReadBytes); 
+        if (-1 == readBytes) {
             perror("read");
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        st_total_read_bytes += st_read_bytes;
+        totalReadBytes += readBytes;
     }
 
-    return st_total_read_bytes;
+    return totalReadBytes;
 }
 
 /************************************************************
-* FUNCTION    :datadeal_file_write()
-* Description :Write data to the file specified by the file 
+* FUNCTION    :DataDeal_fileWrite()
+* Description :Write uiData to the file specified by the file 
 *              descriptor
 * Arguments   :
-* [i_fd][IN]  :File descriptor
-* [buf][IN]   :Buf to store the file data to be read
-* [nbytes][IN]:The size of the file to be written
+* [iFd][IN]  :File descriptor
+* [pBuf][IN]   :Buf to store the file uiData to be read
+* [nBytes][IN]:The size of the file to be written
 * return      :Return the total bytes written
 ************************************************************/
-int datadeal_file_write(int i_fd, const void * buf, ssize_t nbytes)
+int DataDeal_fileWrite(int iFd, const void * pBuf, ssize_t nBytes)
 {
-    ssize_t st_total_write_bytes = 0;
-    ssize_t st_write_bytes = 0;
+    ssize_t totalWriteBytes = 0;
+    ssize_t writeBytes = 0;
 
-    while (st_total_write_bytes < nbytes) {
-        st_write_bytes = write(i_fd, buf, nbytes - st_total_write_bytes); 
-        if (-1 == st_write_bytes) {
+    while (totalWriteBytes < nBytes) {
+        writeBytes = write(iFd, pBuf, nBytes - totalWriteBytes); 
+        if (-1 == writeBytes) {
             perror("read");
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        st_total_write_bytes += st_write_bytes;
+        totalWriteBytes += writeBytes;
     }
 
-    return st_total_write_bytes;
+    return totalWriteBytes;
 }
 
 
 /************************************************************
-* FUNCTION          :datadeal_file_set()
+* FUNCTION          :DataDeal_setFile()
 * Description       :upload files
 * Arguments         :
-* [i_connect_fd][IN]:File descriptor after connection 
+* [iConnectFd][IN]:File descriptor after connection 
 *                    establishment
 * return            :success return FILEDATA_DEAL_RET_OK 
 *                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
-int datadeal_file_set(int i_connect_fd)
+int DataDeal_setFile(int iConnectFd)
 {
-    int i_ret = FILE_CLIENT_OK;
-    int i_send_bytes = 0;
-    int i_file_fd = 0;
-    struct stat st_file_info;
-    ssize_t sst_read_bytes = 0;
+    int iRet = FILE_CLIENT_OK;
+    int iSendBytes = 0;
+    int iFileFd = 0;
+    struct stat stFileInfo;
+    ssize_t readBytes = 0;
         
-    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
-        FILEDATA st_unpack_buf;
-        char *cp_pack_buf = NULL;
-        int i_pack_len = 0; 
+    if (g_stTestHdr.m_enModule == MODULE_TEST_PROTO) {
+        FILEDATA stUnpackBuf;
+        char* pcPackBuf = NULL;
+        int iPackLen = 0; 
 
-        memset(&st_unpack_buf, 0, BUFSIZE);
-        st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_buf.p_cmd_buf) {
+        memset(&stUnpackBuf, 0, BUFSIZE);
+        stUnpackBuf.m_pCmdBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackBuf.m_pCmdBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        st_unpack_buf.p_filename_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_buf.p_filename_buf) {
+        stUnpackBuf.m_pFileNameBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackBuf.m_pFileNameBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        st_unpack_buf.p_filedata_buf = NULL;
-        strncpy(st_unpack_buf.p_cmd_buf, "S", 1);
-        st_unpack_buf.p_cmd_buf[1] = '\0';  
+        stUnpackBuf.m_pFileDataBuf = NULL;
+        strncpy(stUnpackBuf.m_pCmdBuf, "S", 1);
+        stUnpackBuf.m_pCmdBuf[1] = '\0';  
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        i_ret = file_input_string(st_unpack_buf.p_filename_buf);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        iRet = File_inputString(stUnpackBuf.m_pFileNameBuf);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
         /*open the file*/
-        i_file_fd = open(st_unpack_buf.p_filename_buf, O_RDONLY);
-        if (-1 == i_file_fd) {
+        iFileFd = open(stUnpackBuf.m_pFileNameBuf, O_RDONLY);
+        if (-1 == iFileFd) {
             perror("open");
-            file_error("[%s]open is fail!\n", __FUNCTION__);
+            File_error("[%s]open is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
         /*Get the size of file*/
-        memset(&st_file_info, 0, sizeof(st_file_info));
-        i_ret = stat(st_unpack_buf.p_filename_buf, &st_file_info);
-        if (-1 == i_ret) {
+        memset(&stFileInfo, 0, sizeof(stFileInfo));
+        iRet = stat(stUnpackBuf.m_pFileNameBuf, &stFileInfo);
+        if (-1 == iRet) {
             perror("stat");
-            file_error("[%s]stat is fail!\n", __FUNCTION__);
+            File_error("[%s]stat is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        st_unpack_buf.i_file_size = st_file_info.st_size;
-        st_unpack_buf.has_i_file_size = 1;
+        stUnpackBuf.m_uiFileSize = stFileInfo.st_size;
+        stUnpackBuf.has_m_uifilesize = 1;
         
 
-        /*read the file to st_unpack_buf.p_filedata_buf*/
-        st_unpack_buf.p_filedata_buf = (char *)malloc(st_file_info.st_size);
-        if (NULL == st_unpack_buf.p_filedata_buf) {
+        /*read the file to stUnpackBuf.m_pFileDataBuf*/
+        stUnpackBuf.m_pFileDataBuf = (char *)malloc(stFileInfo.st_size);
+        if (NULL == stUnpackBuf.m_pFileDataBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        sst_read_bytes = datadeal_file_read(i_file_fd, st_unpack_buf.p_filedata_buf, st_file_info.st_size);
-        if (-1 == sst_read_bytes) {
-            file_error("[%s]datadeal_file_read is fail!\n", __FUNCTION__);
+        readBytes = DataDeal_fileRead(iFileFd, stUnpackBuf.m_pFileDataBuf, stFileInfo.st_size);
+        if (-1 == readBytes) {
+            File_error("[%s]DataDeal_fileRead is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;     
         }
 
         /*read file size check*/
-        if (sst_read_bytes != st_file_info.st_size) {
-            file_running("file read is fail!\n");   
+        if (readBytes != stFileInfo.st_size) {
+            File_running("file read is fail!\n");   
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        i_pack_len = datadeal_proto_pack(&st_unpack_buf, &cp_pack_buf);
-        if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
+        iPackLen = DataDeal_protoPack(&stUnpackBuf, &pcPackBuf);
+        if (iPackLen == FILEDATA_DEAL_RET_FAIL) {
+            File_error("[%s]DataDeal_protoPack is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        if (NULL != st_unpack_buf.p_cmd_buf) {
-            free(st_unpack_buf.p_cmd_buf);
+        if (NULL != stUnpackBuf.m_pCmdBuf) {
+            free(stUnpackBuf.m_pCmdBuf);
         } 
-        if (NULL != st_unpack_buf.p_filename_buf) {
-            free(st_unpack_buf.p_filename_buf);   
+        if (NULL != stUnpackBuf.m_pFileNameBuf) {
+            free(stUnpackBuf.m_pFileNameBuf);   
         }
-        if (NULL != st_unpack_buf.p_filedata_buf) {
-            free(st_unpack_buf.p_filedata_buf);   
+        if (NULL != stUnpackBuf.m_pFileDataBuf) {
+            free(stUnpackBuf.m_pFileDataBuf);   
         }
-        close(i_file_fd);
+        close(iFileFd);
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_pack_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iPackLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the pack data of cmd filename and file content */
-        i_send_bytes = client_send_data(i_connect_fd, cp_pack_buf, i_pack_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the pack uiData of cmd filename and file content */
+        iSendBytes = Client_sendData(iConnectFd, pcPackBuf, iPackLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_pack_buf[i]);
+        File_printf("Client_sendData send protobuf pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", pcPackBuf);
+        File_printf("cPackBuf size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcPackBuf[i]);
         }
         
-        if (NULL != cp_pack_buf) {
-            free(cp_pack_buf);
+        if (NULL != pcPackBuf) {
+            free(pcPackBuf);
         }   
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_JSON) {
 
-        cJSON *stp_cjson_root = cJSON_CreateObject();
-        char *cp_cjson_data_out = NULL;
-        int i_cjson_data_size = 0;
-        char c_filename_buf_a[BUFSIZE];
-        char *cp_file_data = NULL;
+        cJSON* pstCjsonRoot = cJSON_CreateObject();
+        char* pcCjsonDataOut = NULL;
+        int iCjsonDataSize = 0;
+        char cFileNameBuf[BUFSIZE];
+        char* pcFileData = NULL;
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        memset(&c_filename_buf_a, 0, BUFSIZE);
-        i_ret = file_input_string(c_filename_buf_a);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        memset(&cFileNameBuf, 0, BUFSIZE);
+        iRet = File_inputString(cFileNameBuf);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
         /*open the file*/
-        i_file_fd = open(c_filename_buf_a, O_RDONLY);
-        if (-1 == i_file_fd) {
+        iFileFd = open(cFileNameBuf, O_RDONLY);
+        if (-1 == iFileFd) {
             perror("open");
-            file_error("[%s]open is fail!\n", __FUNCTION__);
+            File_error("[%s]open is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
         /*Get the size of file*/
-        memset(&st_file_info, 0, sizeof(st_file_info));
-        i_ret = stat(c_filename_buf_a, &st_file_info);
-        if (-1 == i_ret) {
+        memset(&stFileInfo, 0, sizeof(stFileInfo));
+        iRet = stat(cFileNameBuf, &stFileInfo);
+        if (-1 == iRet) {
             perror("stat");
-            file_error("[%s]stat is fail!\n", __FUNCTION__);
+            File_error("[%s]stat is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        /*read the file to cp_file_data*/
-        cp_file_data = (char *)malloc(st_file_info.st_size);
-        if (NULL == cp_file_data) {
+        /*read the file to pcFileData*/
+        pcFileData = (char *)malloc(stFileInfo.st_size);
+        if (NULL == pcFileData) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        sst_read_bytes = datadeal_file_read(i_file_fd, cp_file_data, st_file_info.st_size);
-        if (-1 == sst_read_bytes) {
-            file_error("[%s]datadeal_file_read is fail!\n", __FUNCTION__);
+        readBytes = DataDeal_fileRead(iFileFd, pcFileData, stFileInfo.st_size);
+        if (-1 == readBytes) {
+            File_error("[%s]DataDeal_fileRead is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;     
         }
 
         /*read file size check*/
-        if (sst_read_bytes != st_file_info.st_size) {
-            file_running("file read is fail!\n");   
+        if (readBytes != stFileInfo.st_size) {
+            File_running("file read is fail!\n");   
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
         /*add the "S" cmd to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "S");
+        cJSON_AddStringToObject(pstCjsonRoot, "string_cmd", "S");
         /*add the filename to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_file_name", c_filename_buf_a);
-        /*add the file content data to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_file_data", cp_file_data);
+        cJSON_AddStringToObject(pstCjsonRoot, "string_file_name", cFileNameBuf);
+        /*add the file content uiData to the json structure*/
+        cJSON_AddStringToObject(pstCjsonRoot, "string_file_data", pcFileData);
         /*add the file size to the json structure*/
-        cJSON_AddNumberToObject(stp_cjson_root, "number_file_size", st_file_info.st_size);
+        cJSON_AddNumberToObject(pstCjsonRoot, "number_file_size", stFileInfo.st_size);
         
-        /*output the json data to char*/
-        cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+        /*output the json uiData to char*/
+        pcCjsonDataOut = cJSON_PrintUnformatted(pstCjsonRoot);
         
-        /*judge the data size of bytes*/
-        i_cjson_data_size = strlen(cp_cjson_data_out);
+        /*judge the uiData size of bytes*/
+        iCjsonDataSize = strlen(pcCjsonDataOut);
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iCjsonDataSize + 1;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the cjson pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the cjson pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, pcCjsonDataOut, iCjsonDataSize + 1);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
-        file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_cjson_data_out[i]);
+        File_printf("Client_sendData send cjson pack uiData %d bytes\n", iSendBytes);
+        File_printf("pcCjsonDataOut = %s\n", pcCjsonDataOut);
+        File_printf("pcCjsonDataOut size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcCjsonDataOut[i]);
         }
 
-        if (NULL != stp_cjson_root) {
-            cJSON_Delete(stp_cjson_root);
-            stp_cjson_root = NULL;
+        if (NULL != pstCjsonRoot) {
+            cJSON_Delete(pstCjsonRoot);
+            pstCjsonRoot = NULL;
         }
-        if (NULL != cp_cjson_data_out) {
-            free(cp_cjson_data_out);
-            cp_cjson_data_out = NULL;
+        if (NULL != pcCjsonDataOut) {
+            free(pcCjsonDataOut);
+            pcCjsonDataOut = NULL;
         }
-        if (NULL != cp_file_data) {
-            free(cp_file_data);
-            cp_file_data = NULL;
+        if (NULL != pcFileData) {
+            free(pcFileData);
+            pcFileData = NULL;
         }  
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_TLV) {
         
-        FILE_DATA_ST st_file_data;
-        char c_pack_buf_a[BUFSIZE];
-        unsigned int ui_tlv_totol_len = 0; 
-        int i_ret = TLV_ENCODE_RET_OK;
+        FileData_S stFileData;
+        char cPackBuf[BUFSIZE];
+        unsigned int uiTlvTotolLen = 0; 
+        int iRet = TLV_ENCODE_RET_OK;
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
-        i_ret = file_input_string(st_file_data.c_file_name);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        memset(&stFileData, 0, sizeof(FileData_S));
+        iRet = File_inputString(stFileData.m_cFileName);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
         /*open the file*/
-        i_file_fd = open(st_file_data.c_file_name, O_RDONLY);
-        if (-1 == i_file_fd) {
+        iFileFd = open(stFileData.m_cFileName, O_RDONLY);
+        if (-1 == iFileFd) {
             perror("open");
-            file_error("[%s]open is fail!\n", __FUNCTION__);
+            File_error("[%s]open is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
         /*Get the size of file*/
-        memset(&st_file_info, 0, sizeof(st_file_info));
-        i_ret = stat(st_file_data.c_file_name, &st_file_info);
-        if (-1 == i_ret) {
+        memset(&stFileInfo, 0, sizeof(stFileInfo));
+        iRet = stat(stFileData.m_cFileName, &stFileInfo);
+        if (-1 == iRet) {
             perror("stat");
-            file_error("[%s]stat is fail!\n", __FUNCTION__);
+            File_error("[%s]stat is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        /*read the file to cp_file_data*/
-        st_file_data.cp_file_content = (char *)malloc(st_file_info.st_size + 1);
-        if (NULL == st_file_data.cp_file_content) {
+        /*read the file to pcFileData*/
+        stFileData.m_pcFileContent = (char *)malloc(stFileInfo.st_size + 1);
+        if (NULL == stFileData.m_pcFileContent) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        sst_read_bytes = datadeal_file_read(i_file_fd, st_file_data.cp_file_content, st_file_info.st_size);
-        if (-1 == sst_read_bytes) {
-            file_error("[%s]datadeal_file_read is fail!\n", __FUNCTION__);
+        readBytes = DataDeal_fileRead(iFileFd, stFileData.m_pcFileContent, stFileInfo.st_size);
+        if (-1 == readBytes) {
+            File_error("[%s]DataDeal_fileRead is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;     
         }
 
         /*read file size check*/
-        if (sst_read_bytes != st_file_info.st_size) {
-            file_running("file read is fail!\n");   
+        if (readBytes != stFileInfo.st_size) {
+            File_running("file read is fail!\n");   
             return FILEDATA_DEAL_RET_FAIL; 
         }
 
-        /*pading the FILE_DATA_ST structure*/
-        strcpy(st_file_data.c_file_cmd, "S");
-        st_file_data.c_file_cmd[1] = '\0';
-        st_file_data.ui_file_size = st_file_info.st_size;
-        st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+        /*pading the FileData_S structure*/
+        strcpy(stFileData.m_cFileCmd, "S");
+        stFileData.m_cFileCmd[1] = '\0';
+        stFileData.m_uiFileSize = stFileInfo.st_size;
+        stFileData.m_uiDataTotolSize = 12 + 12 + 4 + stFileData.m_uiFileSize; 
 
-        /*tlv encode the st_file_data*/
-        i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
-        if (TLV_ENCODE_RET_FAIL == i_ret) {
-            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+        /*tlv encode the stFileData*/
+        iRet = tlvEncodeFile(&stFileData, cPackBuf, &uiTlvTotolLen, BUFSIZE);
+        if (TLV_ENCODE_RET_FAIL == iRet) {
+            File_error("[%s]tlvEncodeFile is fail\n", __FUNCTION__); 
             return FILEDATA_DEAL_RET_FAIL;
         }
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = uiTlvTotolLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the tlv pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the tlv pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, cPackBuf, uiTlvTotolLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", c_pack_buf_a[i]);
+        File_printf("Client_sendData send tlv pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", cPackBuf);
+        File_printf("uiTlvTotolLen size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", cPackBuf[i]);
         }
 
-        if (NULL != st_file_data.cp_file_content) {
-            free(st_file_data.cp_file_content);
-            st_file_data.cp_file_content = NULL;
+        if (NULL != stFileData.m_pcFileContent) {
+            free(stFileData.m_pcFileContent);
+            stFileData.m_pcFileContent = NULL;
         }
-        close(i_file_fd);
+        close(iFileFd);
     }    
 }
 
 /************************************************************
-* FUNCTION          :datadeal_file_set()
+* FUNCTION          :DataDeal_setFile()
 * Description       :download file
 * Arguments         :
-* [i_connect_fd][IN]:File descriptor after connection 
+* [iConnectFd][IN]:File descriptor after connection 
 *                    establishment
 * return            :success return FILEDATA_DEAL_RET_OK 
 *                    and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
-int datadeal_file_get(int i_connect_fd)
+int DataDeal_getFile(int iConnectFd)
 {
-    int i_ret = FILE_CLIENT_OK;
-    int i_send_bytes = 0;
-    int i_recv_data_bytes = 0;
-    int i_file_fd = 0;
-    TEST_HDR_T st_test_hdr;  
-    ssize_t sst_write_bytes = 0;
+    int iRet = FILE_CLIENT_OK;
+    int iSendBytes = 0;
+    int iRecvDataBytes = 0;
+    int iFileFd = 0;
+    TestHdr_S stTestHdr;  
+    ssize_t writeBytes = 0;
 
-    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_PROTO) {
         
-        FILEDATA st_unpack_buf;
-        char *cp_pack_buf = NULL;
-        int i_pack_len = 0;
+        FILEDATA stUnpackBuf;
+        char* pcPackBuf = NULL;
+        int iPackLen = 0;
 
-        memset(&st_unpack_buf, 0, BUFSIZE);
-        st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_buf.p_cmd_buf) {
+        memset(&stUnpackBuf, 0, BUFSIZE);
+        stUnpackBuf.m_pCmdBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackBuf.m_pCmdBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        st_unpack_buf.p_filename_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_buf.p_filename_buf) {
+        stUnpackBuf.m_pFileNameBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackBuf.m_pFileNameBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        st_unpack_buf.p_filedata_buf = NULL;
-        st_unpack_buf.has_i_file_size = 0;
-        strncpy(st_unpack_buf.p_cmd_buf, "G", 1);
-        st_unpack_buf.p_cmd_buf[1] = '\0';  
+        stUnpackBuf.m_pFileDataBuf = NULL;
+        stUnpackBuf.has_m_uifilesize = 0;
+        strncpy(stUnpackBuf.m_pCmdBuf, "G", 1);
+        stUnpackBuf.m_pCmdBuf[1] = '\0';  
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        i_ret = file_input_string(st_unpack_buf.p_filename_buf);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        iRet = File_inputString(stUnpackBuf.m_pFileNameBuf);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
-        /*pack the origin data*/
-        i_pack_len = datadeal_proto_pack(&st_unpack_buf, &cp_pack_buf);
-        if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
+        /*pack the origin uiData*/
+        iPackLen = DataDeal_protoPack(&stUnpackBuf, &pcPackBuf);
+        if (iPackLen == FILEDATA_DEAL_RET_FAIL) {
+            File_error("[%s]DataDeal_protoPack is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        if (NULL != st_unpack_buf.p_cmd_buf) {
-            free(st_unpack_buf.p_cmd_buf);
-            st_unpack_buf.p_cmd_buf = NULL;
+        if (NULL != stUnpackBuf.m_pCmdBuf) {
+            free(stUnpackBuf.m_pCmdBuf);
+            stUnpackBuf.m_pCmdBuf = NULL;
         } 
-        if (NULL != st_unpack_buf.p_filename_buf) {
-            free(st_unpack_buf.p_filename_buf);  
-            st_unpack_buf.p_filename_buf = NULL;
+        if (NULL != stUnpackBuf.m_pFileNameBuf) {
+            free(stUnpackBuf.m_pFileNameBuf);  
+            stUnpackBuf.m_pFileNameBuf = NULL;
         }
-        if (NULL != st_unpack_buf.p_filedata_buf) {
-            free(st_unpack_buf.p_filedata_buf);  
-            st_unpack_buf.p_filedata_buf = NULL;
+        if (NULL != stUnpackBuf.m_pFileDataBuf) {
+            free(stUnpackBuf.m_pFileDataBuf);  
+            stUnpackBuf.m_pFileDataBuf = NULL;
         }
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_pack_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iPackLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, cp_pack_buf, i_pack_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, pcPackBuf, iPackLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_pack_buf[i]);
+        File_printf("Client_sendData send protobuf pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", pcPackBuf);
+        File_printf("cPackBuf size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcPackBuf[i]);
         }
 
-        if (NULL != cp_pack_buf) {
-            free(cp_pack_buf);
-            cp_pack_buf = NULL;
+        if (NULL != pcPackBuf) {
+            free(pcPackBuf);
+            pcPackBuf = NULL;
         }
 
         /*recv file content size of hdr*/
-        memset(&st_test_hdr, 0, sizeof(st_test_hdr));
-        i_recv_data_bytes = client_recv_data(i_connect_fd, &st_test_hdr, sizeof(st_test_hdr)); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
-            close(i_connect_fd);
+        memset(&stTestHdr, 0, sizeof(stTestHdr));
+        iRecvDataBytes = Client_recvData(iConnectFd, &stTestHdr, sizeof(stTestHdr)); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
+            close(iConnectFd);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
-            file_running("recv server hdr is success!\n");
-            file_printf("client_recv_data recv protobuf pack data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server hdr is success!\n");
+            File_printf("Client_recvData recv protobuf pack uiData %d bytes\n", iRecvDataBytes);
         } 
 
-        /*recv pack file content data from sever*/
-        cp_pack_buf = (char *)malloc(st_test_hdr.ui_dat_len);
-        if (NULL == cp_pack_buf) {
+        /*recv pack file content uiData from sever*/
+        pcPackBuf = (char *)malloc(stTestHdr.m_uiDataLen);
+        if (NULL == pcPackBuf) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
         }
-        i_recv_data_bytes = client_recv_data(i_connect_fd, (char *)cp_pack_buf, st_test_hdr.ui_dat_len); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
-            close(i_connect_fd);
+        iRecvDataBytes = Client_recvData(iConnectFd, (char *)pcPackBuf, stTestHdr.m_uiDataLen); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
+            close(iConnectFd);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != st_test_hdr.ui_dat_len) {
-                file_running("file size is checking fail!\n");  
+            if (iRecvDataBytes != stTestHdr.m_uiDataLen) {
+                File_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
-            file_running("recv server data is success!\n");
-            file_printf("client_recv_data recv protobuf pack data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server uiData is success!\n");
+            File_printf("Client_recvData recv protobuf pack uiData %d bytes\n", iRecvDataBytes);
         } 
         
-        /*unpack the pack data*/
-        memset(&st_unpack_buf, 0, sizeof(st_unpack_buf));
-        i_ret = datadeal_proto_unpack(cp_pack_buf, &st_unpack_buf, st_test_hdr.ui_dat_len);
-        if (i_ret == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_proto_unpack is error!\n", __FUNCTION__);
+        /*unpack the pack uiData*/
+        memset(&stUnpackBuf, 0, sizeof(stUnpackBuf));
+        iRet = DataDeal_protoUnpack(pcPackBuf, &stUnpackBuf, stTestHdr.m_uiDataLen);
+        if (iRet == FILEDATA_DEAL_RET_FAIL) {
+            File_error("[%s]DataDeal_protoUnpack is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
         }
 
-        if (NULL != cp_pack_buf) {
-            free(cp_pack_buf);
-            cp_pack_buf = NULL;
+        if (NULL != pcPackBuf) {
+            free(pcPackBuf);
+            pcPackBuf = NULL;
         }
     
         /*open the file*/
         while (1) {
-            i_file_fd = open(st_unpack_buf.p_filename_buf, O_WRONLY|O_CREAT|O_EXCL);
-            if (-1 == i_file_fd) {
+            iFileFd = open(stUnpackBuf.m_pFileNameBuf, O_WRONLY|O_CREAT|O_EXCL);
+            if (-1 == iFileFd) {
                 if (errno == EEXIST) {
-                    i_ret = remove(st_unpack_buf.p_filename_buf);
-                    if (-1 == i_ret) {
+                    iRet = remove(stUnpackBuf.m_pFileNameBuf);
+                    if (-1 == iRet) {
                         perror("remove");
-                        file_error("[%s]remove is error!\n", __FUNCTION__);
+                        File_error("[%s]remove is error!\n", __FUNCTION__);
                         return 0;
                     }
                     continue;
                 } else {
                     perror("open");
-                    file_error("[%s]open is fail!\n", __FUNCTION__);
+                    File_error("[%s]open is fail!\n", __FUNCTION__);
                     return FILEDATA_DEAL_RET_FAIL;     
                 }
             } else {
@@ -656,183 +656,183 @@ int datadeal_file_get(int i_connect_fd)
             }   
         }
 
-        /*write data to filename*/
-        if (1 == st_unpack_buf.has_i_file_size) {
-            sst_write_bytes = datadeal_file_write(i_file_fd, st_unpack_buf.p_filedata_buf, st_unpack_buf.i_file_size);
-            if (-1 == sst_write_bytes) {
-                file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+        /*write uiData to filename*/
+        if (1 == stUnpackBuf.has_m_uifilesize) {
+            writeBytes = DataDeal_fileWrite(iFileFd, stUnpackBuf.m_pFileDataBuf, stUnpackBuf.m_uiFileSize);
+            if (-1 == writeBytes) {
+                File_error("[%s]DataDeal_fileWrite is fail!\n", __FUNCTION__);
                 return FILEDATA_DEAL_RET_FAIL;     
             }   
         } else {
-            sst_write_bytes = datadeal_file_write(i_file_fd, st_unpack_buf.p_filedata_buf, BUFSIZE);
-            if (-1 == sst_write_bytes) {
-                file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+            writeBytes = DataDeal_fileWrite(iFileFd, stUnpackBuf.m_pFileDataBuf, BUFSIZE);
+            if (-1 == writeBytes) {
+                File_error("[%s]DataDeal_fileWrite is fail!\n", __FUNCTION__);
                 return FILEDATA_DEAL_RET_FAIL;     
             }       
         }
-        file_running("file write is success!\n");
+        File_running("file write is success!\n");
 
-        if (NULL != st_unpack_buf.p_cmd_buf) {
-            free(st_unpack_buf.p_cmd_buf);
-            st_unpack_buf.p_cmd_buf = NULL;
+        if (NULL != stUnpackBuf.m_pCmdBuf) {
+            free(stUnpackBuf.m_pCmdBuf);
+            stUnpackBuf.m_pCmdBuf = NULL;
         }
-        if (NULL != st_unpack_buf.p_filename_buf) {
-            free(st_unpack_buf.p_filename_buf); 
-            st_unpack_buf.p_cmd_buf = NULL;
+        if (NULL != stUnpackBuf.m_pFileNameBuf) {
+            free(stUnpackBuf.m_pFileNameBuf); 
+            stUnpackBuf.m_pCmdBuf = NULL;
         }
-        if (NULL != st_unpack_buf.p_filedata_buf) {
-            free(st_unpack_buf.p_filedata_buf); 
-            st_unpack_buf.p_cmd_buf = NULL;
+        if (NULL != stUnpackBuf.m_pFileDataBuf) {
+            free(stUnpackBuf.m_pFileDataBuf); 
+            stUnpackBuf.m_pCmdBuf = NULL;
         }
-        close(i_file_fd);
+        close(iFileFd);
         
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_JSON) {
 
-        cJSON *stp_cjson_root = cJSON_CreateObject();
-        char *cp_cjson_data_out = NULL;
-        int i_cjson_data_size = 0;
-        char c_filename_buf_a[BUFSIZE];
-        char *cp_file_data = NULL; 
+        cJSON* pstCjsonRoot = cJSON_CreateObject();
+        char* pcCjsonDataOut = NULL;
+        int iCjsonDataSize = 0;
+        char cFileNameBuf[BUFSIZE];
+        char* pcFileData = NULL; 
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        memset(&c_filename_buf_a, 0, BUFSIZE);
-        i_ret = file_input_string(c_filename_buf_a);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        memset(&cFileNameBuf, 0, BUFSIZE);
+        iRet = File_inputString(cFileNameBuf);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
         /*add the "G" cmd to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "G");
+        cJSON_AddStringToObject(pstCjsonRoot, "string_cmd", "G");
         /*add the filename to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_file_name", c_filename_buf_a);
+        cJSON_AddStringToObject(pstCjsonRoot, "string_file_name", cFileNameBuf);
         
-        /*output the json data to char*/
-        cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+        /*output the json uiData to char*/
+        pcCjsonDataOut = cJSON_PrintUnformatted(pstCjsonRoot);
         
-        /*judge the data size of bytes*/
-        i_cjson_data_size = strlen(cp_cjson_data_out);
+        /*judge the uiData size of bytes*/
+        iCjsonDataSize = strlen(pcCjsonDataOut);
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iCjsonDataSize + 1;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the cjson pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the cjson pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, pcCjsonDataOut, iCjsonDataSize + 1);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
-        file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_cjson_data_out[i]);
+        File_printf("Client_sendData send cjson pack uiData %d bytes\n", iSendBytes);
+        File_printf("pcCjsonDataOut = %s\n", pcCjsonDataOut);
+        File_printf("pcCjsonDataOut size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcCjsonDataOut[i]);
         }
 
-        cJSON_Delete(stp_cjson_root);
-        if (NULL != cp_cjson_data_out) {
-            free(cp_cjson_data_out);
-            cp_cjson_data_out = NULL;
+        cJSON_Delete(pstCjsonRoot);
+        if (NULL != pcCjsonDataOut) {
+            free(pcCjsonDataOut);
+            pcCjsonDataOut = NULL;
         }
 
         /*recv file content size of hdr*/
-        memset(&st_test_hdr, 0, sizeof(st_test_hdr));
-        i_recv_data_bytes = client_recv_data(i_connect_fd, &st_test_hdr, sizeof(st_test_hdr)); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
-            close(i_connect_fd);
+        memset(&stTestHdr, 0, sizeof(stTestHdr));
+        iRecvDataBytes = Client_recvData(iConnectFd, &stTestHdr, sizeof(stTestHdr)); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
+            close(iConnectFd);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
-            file_running("recv server hdr is success!\n");
-            file_printf("client_recv_data recv hdr data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server hdr is success!\n");
+            File_printf("Client_recvData recv hdr uiData %d bytes\n", iRecvDataBytes);
         } 
 
-        cJSON * stp_json = NULL; 
-        cJSON * stp_json_str_filename = NULL; 
-        cJSON * stp_json_str_filedata = NULL; 
-        cJSON * stp_json_num_filesize = NULL; 
+        cJSON* pstJson = NULL; 
+        cJSON* pstJsonStrFileName = NULL; 
+        cJSON* pstJsonStrFileData = NULL; 
+        cJSON* pstJsonNumFileSize = NULL; 
 
-        /*recv pack file content data from sever*/
-        cp_cjson_data_out = (char *)malloc(st_test_hdr.ui_dat_len);
-        if (NULL == cp_cjson_data_out) {
+        /*recv pack file content uiData from sever*/
+        pcCjsonDataOut = (char *)malloc(stTestHdr.m_uiDataLen);
+        if (NULL == pcCjsonDataOut) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;      
         }
-        i_recv_data_bytes = client_recv_data(i_connect_fd, (char *)cp_cjson_data_out, st_test_hdr.ui_dat_len); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+        iRecvDataBytes = Client_recvData(iConnectFd, (char *)pcCjsonDataOut, stTestHdr.m_uiDataLen); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != st_test_hdr.ui_dat_len) {
-                file_running("file size is checking fail!\n");  
+            if (iRecvDataBytes != stTestHdr.m_uiDataLen) {
+                File_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
-            file_running("recv server file content of cjsont pack data is success!\n");
-            file_printf("client_recv_data recv cjosn pack data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server file content of cjsont pack uiData is success!\n");
+            File_printf("Client_recvData recv cjosn pack uiData %d bytes\n", iRecvDataBytes);
         }
 
-        /*Parse the json data*/
-        stp_json = cJSON_Parse(cp_cjson_data_out);
-        if (NULL == stp_json) {
-            file_error("[%s]cJSON_Parse is error, close server!!\n", __FUNCTION__);  
+        /*Parse the json uiData*/
+        pstJson = cJSON_Parse(pcCjsonDataOut);
+        if (NULL == pstJson) {
+            File_error("[%s]cJSON_Parse is error, close server!!\n", __FUNCTION__);  
              return FILEDATA_DEAL_RET_FAIL;  
         }
 
         /*get the item that the key name is string_file_data*/
-        stp_json_str_filedata = cJSON_GetObjectItem(stp_json, "string_file_data");
-        if (cJSON_IsString(stp_json_str_filedata)) {
-            if (!strncmp(stp_json_str_filedata->string, "string_file_data", 16)) {
-                file_running("[%s]json string_file_data check is success!\n", __FUNCTION__);    
+        pstJsonStrFileData = cJSON_GetObjectItem(pstJson, "string_file_data");
+        if (cJSON_IsString(pstJsonStrFileData)) {
+            if (!strncmp(pstJsonStrFileData->string, "string_file_data", 16)) {
+                File_running("[%s]json string_file_data check is success!\n", __FUNCTION__);    
             } else {
-                file_running("[%s]json string_file_data check is fail!\n", __FUNCTION__); 
+                File_running("[%s]json string_file_data check is fail!\n", __FUNCTION__); 
                 return FILEDATA_DEAL_RET_FAIL; 
             } 
         }
 
         /*get the item that the key name is number_file_size*/
-        stp_json_num_filesize = cJSON_GetObjectItem(stp_json, "number_file_size");
-        if (cJSON_IsNumber(stp_json_num_filesize)) {
-            if (!strncmp(stp_json_num_filesize->string, "number_file_size", 16)) {
-                file_running("[%s]json number_file_size check is success!\n", __FUNCTION__);    
+        pstJsonNumFileSize = cJSON_GetObjectItem(pstJson, "number_file_size");
+        if (cJSON_IsNumber(pstJsonNumFileSize)) {
+            if (!strncmp(pstJsonNumFileSize->string, "number_file_size", 16)) {
+                File_running("[%s]json number_file_size check is success!\n", __FUNCTION__);    
             } else {
-                file_running("[%s]json number_file_size check is fail!\n", __FUNCTION__); 
+                File_running("[%s]json number_file_size check is fail!\n", __FUNCTION__); 
                 return FILEDATA_DEAL_RET_FAIL; 
             } 
         }
 
         /*open the file*/
         while (1) {
-            i_file_fd = open(c_filename_buf_a, O_WRONLY|O_CREAT|O_EXCL);
-            if (-1 == i_file_fd) {
+            iFileFd = open(cFileNameBuf, O_WRONLY|O_CREAT|O_EXCL);
+            if (-1 == iFileFd) {
                 if (errno == EEXIST) {
-                    i_ret = remove(c_filename_buf_a);
-                    if (-1 == i_ret) {
+                    iRet = remove(cFileNameBuf);
+                    if (-1 == iRet) {
                         perror("remove");
-                        file_error("[%s]remove is error!\n", __FUNCTION__);
+                        File_error("[%s]remove is error!\n", __FUNCTION__);
                         return 0;
                     }
                     continue;
                 } else {
                     perror("open");
-                    file_error("[%s]open is fail!\n", __FUNCTION__);
+                    File_error("[%s]open is fail!\n", __FUNCTION__);
                     return FILEDATA_DEAL_RET_FAIL;     
                 }
             } else {
@@ -840,141 +840,141 @@ int datadeal_file_get(int i_connect_fd)
             }   
         }
 
-        /*write data to filename*/      
-        sst_write_bytes = datadeal_file_write(i_file_fd, stp_json_str_filedata->valuestring, stp_json_num_filesize->valueint);
-        if (-1 == sst_write_bytes) {
-            file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+        /*write uiData to filename*/      
+        writeBytes = DataDeal_fileWrite(iFileFd, pstJsonStrFileData->valuestring, pstJsonNumFileSize->valueint);
+        if (-1 == writeBytes) {
+            File_error("[%s]DataDeal_fileWrite is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;     
         }   
-        file_running("file write is success!\n");
+        File_running("file write is success!\n");
 
-        close(i_file_fd);
-        if (NULL != cp_cjson_data_out) {
-            free(cp_cjson_data_out);
-            cp_cjson_data_out = NULL;
+        close(iFileFd);
+        if (NULL != pcCjsonDataOut) {
+            free(pcCjsonDataOut);
+            pcCjsonDataOut = NULL;
         }
-        if (NULL != stp_json) {
-            cJSON_Delete(stp_json);
-            stp_json = NULL;
+        if (NULL != pstJson) {
+            cJSON_Delete(pstJson);
+            pstJson = NULL;
         }
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_TLV) {
         
-        FILE_DATA_ST st_file_data;
-        char c_pack_buf_a[BUFSIZE];
-        unsigned int ui_tlv_totol_len = 0; 
-        int i_ret = TLV_ENCODE_RET_OK;
+        FileData_S stFileData;
+        char cPackBuf[BUFSIZE];
+        unsigned int uiTlvTotolLen = 0; 
+        int iRet = TLV_ENCODE_RET_OK;
 
         /*read the filename*/
-        file_running("Please input file name:\n");
-        memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
-        i_ret = file_input_string(st_file_data.c_file_name);
-        if (i_ret == FILEINPUT_RET_FAIL) {
-            file_error("[%s]file_input_string is fail!\n", __FUNCTION__);
+        File_running("Please input file name:\n");
+        memset(&stFileData, 0, sizeof(FileData_S));
+        iRet = File_inputString(stFileData.m_cFileName);
+        if (iRet == FILEINPUT_RET_FAIL) {
+            File_error("[%s]File_inputString is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
 
-        /*pading the FILE_DATA_ST structure*/
-        strcpy(st_file_data.c_file_cmd, "G");
-        st_file_data.c_file_cmd[1] = '\0';
-        st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+        /*pading the FileData_S structure*/
+        strcpy(stFileData.m_cFileCmd, "G");
+        stFileData.m_cFileCmd[1] = '\0';
+        stFileData.m_uiDataTotolSize = 12 + 12 + 4 + stFileData.m_uiFileSize; 
 
-        /*tlv encode the st_file_data*/
-        memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
-        if (TLV_ENCODE_RET_FAIL == i_ret) {
-            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+        /*tlv encode the stFileData*/
+        memset(cPackBuf, 0, sizeof(cPackBuf));
+        iRet = tlvEncodeFile(&stFileData, cPackBuf, &uiTlvTotolLen, BUFSIZE);
+        if (TLV_ENCODE_RET_FAIL == iRet) {
+            File_error("[%s]tlvEncodeFile is fail\n", __FUNCTION__); 
             return FILEDATA_DEAL_RET_FAIL;
         }
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = uiTlvTotolLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the tlv pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the tlv pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, cPackBuf, uiTlvTotolLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", c_pack_buf_a[i]);
+        File_printf("Client_sendData send tlv pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", cPackBuf);
+        File_printf("uiTlvTotolLen size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", cPackBuf[i]);
         }
 
         /*recv file content size of hdr*/
-        memset(&st_test_hdr, 0, sizeof(st_test_hdr));
-        i_recv_data_bytes = client_recv_data(i_connect_fd, &st_test_hdr, sizeof(st_test_hdr)); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
-            close(i_connect_fd);
+        memset(&stTestHdr, 0, sizeof(stTestHdr));
+        iRecvDataBytes = Client_recvData(iConnectFd, &stTestHdr, sizeof(stTestHdr)); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
+            close(iConnectFd);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
-            file_running("recv server hdr is success!\n");
-            file_printf("client_recv_data recv hdr data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server hdr is success!\n");
+            File_printf("Client_recvData recv hdr uiData %d bytes\n", iRecvDataBytes);
         } 
 
-        /*recv pack file content data from sever*/
-        memset(c_pack_buf_a, 0, sizeof(c_pack_buf_a));
-        i_recv_data_bytes = client_recv_data(i_connect_fd, (char *)c_pack_buf_a, st_test_hdr.ui_dat_len); 
-        if (i_recv_data_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_recv_data is error, close server!!\n", __FUNCTION__);
+        /*recv pack file content uiData from sever*/
+        memset(cPackBuf, 0, sizeof(cPackBuf));
+        iRecvDataBytes = Client_recvData(iConnectFd, (char *)cPackBuf, stTestHdr.m_uiDataLen); 
+        if (iRecvDataBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_recvData is error, close server!!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
-        } else if (i_recv_data_bytes == FILE_CLIENT_RECV_PEER_DOWN) {
-            file_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
+        } else if (iRecvDataBytes == FILE_CLIENT_RECV_PEER_DOWN) {
+            File_running("[%s]SERVER close the connect!\n", __FUNCTION__);    
         } else {
             /*check having read file size */
-            if (i_recv_data_bytes != st_test_hdr.ui_dat_len) {
-                file_running("file size is checking fail!\n");  
+            if (iRecvDataBytes != stTestHdr.m_uiDataLen) {
+                File_running("file size is checking fail!\n");  
                 return FILEDATA_DEAL_RET_FAIL; 
             }
-            file_running("recv server file content of tlv pack data is success!\n");
-            file_printf("client_recv_data recv tlv pack data %d bytes\n", i_recv_data_bytes);
+            File_running("recv server file content of tlv pack uiData is success!\n");
+            File_printf("Client_recvData recv tlv pack uiData %d bytes\n", iRecvDataBytes);
         }
 
-        /*decode the tlv pack data*/
-        memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
-        st_file_data.cp_file_content = (char *)malloc(st_test_hdr.ui_dat_len);
-        if (NULL == st_file_data.cp_file_content) {
+        /*decode the tlv pack uiData*/
+        memset(&stFileData, 0, sizeof(FileData_S));
+        stFileData.m_pcFileContent = (char *)malloc(stTestHdr.m_uiDataLen);
+        if (NULL == stFileData.m_pcFileContent) {
             perror("malloc");
-            file_error("[%s]malloc is fail!\n", __FUNCTION__);
+            File_error("[%s]malloc is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL; 
         }
-        i_ret = tlv_decode_file(c_pack_buf_a, st_test_hdr.ui_dat_len, &st_file_data);
-        if (TLV_DECODE_RET_FAIL == i_ret) {
-            file_error("[%s]tlv_decode_file is fail!\n", __FUNCTION__);  
+        iRet = tlvDecodeFile(cPackBuf, stTestHdr.m_uiDataLen, &stFileData);
+        if (TLV_DECODE_RET_FAIL == iRet) {
+            File_error("[%s]tlvDecodeFile is fail!\n", __FUNCTION__);  
             return FILEDATA_DEAL_RET_FAIL;
         }
 
         /*open the file*/
         while (1) {
-            i_file_fd = open(st_file_data.c_file_name, O_WRONLY|O_CREAT|O_EXCL);
-            if (-1 == i_file_fd) {
+            iFileFd = open(stFileData.m_cFileName, O_WRONLY|O_CREAT|O_EXCL);
+            if (-1 == iFileFd) {
                 if (errno == EEXIST) {
-                    i_ret = remove(st_file_data.c_file_name);
-                    if (-1 == i_ret) {
+                    iRet = remove(stFileData.m_cFileName);
+                    if (-1 == iRet) {
                         perror("remove");
-                        file_error("[%s]remove is error!\n", __FUNCTION__);
+                        File_error("[%s]remove is error!\n", __FUNCTION__);
                         return 0;
                     }
                     continue;
                 } else {
                     perror("open");
-                    file_error("[%s]open is fail!\n", __FUNCTION__);
+                    File_error("[%s]open is fail!\n", __FUNCTION__);
                     return FILEDATA_DEAL_RET_FAIL;     
                 }
             } else {
@@ -982,18 +982,18 @@ int datadeal_file_get(int i_connect_fd)
             }   
         }
 
-        /*write data to filename*/  
-        sst_write_bytes = datadeal_file_write(i_file_fd, st_file_data.cp_file_content, st_file_data.ui_file_size);
-        if (-1 == sst_write_bytes) {
-            file_error("[%s]datadeal_file_write is fail!\n", __FUNCTION__);
+        /*write uiData to filename*/  
+        writeBytes = DataDeal_fileWrite(iFileFd, stFileData.m_pcFileContent, stFileData.m_uiFileSize);
+        if (-1 == writeBytes) {
+            File_error("[%s]DataDeal_fileWrite is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;     
         }
-        file_running("file write is success!\n");
+        File_running("file write is success!\n");
 
-        close(i_file_fd);
-        if (NULL != st_file_data.cp_file_content) {
-            free(st_file_data.cp_file_content);
-            st_file_data.cp_file_content = NULL;
+        close(iFileFd);
+        if (NULL != stFileData.m_pcFileContent) {
+            free(stFileData.m_pcFileContent);
+            stFileData.m_pcFileContent = NULL;
         }
     }    
 }
@@ -1002,376 +1002,376 @@ int datadeal_file_get(int i_connect_fd)
 * FUNCTION          :datadeal_file_list()
 * Description       :Get a list of file servers
 * Arguments         :
-* [i_connect_fd][IN]:File descriptor after connection 
+* [iConnectFd][IN]:File descriptor after connection 
 *                    establishment
 * return            :success return FILEDATA_DEAL_RET_OK and 
 *                    fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
-int datadeal_file_list(int i_connect_fd)
+int datadeal_file_list(int iConnectFd)
 {  
-    int i_ret = FILE_CLIENT_OK;
-    int i_send_bytes = 0;
-    char c_filename_buf_a[BUFSIZE];
+    int iRet = FILE_CLIENT_OK;
+    int iSendBytes = 0;
+    char cFileNameBuf[BUFSIZE];
 
-    if (g_stTestHdr.en_module == MODULE_TEST_PROTO) {
-        FILEDATA st_unpack_buf;
-        char *cp_pack_buf = NULL;
-        int i_pack_len = 0;
+    if (g_stTestHdr.m_enModule == MODULE_TEST_PROTO) {
+        FILEDATA stUnpackBuf;
+        char* pcPackBuf = NULL;
+        int iPackLen = 0;
     
-        memset(&st_unpack_buf, 0, BUFSIZE);
-        st_unpack_buf.p_cmd_buf = (char *)malloc(BUFSIZE);
-        st_unpack_buf.p_filename_buf = NULL;
-        st_unpack_buf.p_filedata_buf = NULL;
-        st_unpack_buf.has_i_file_size = 0;
-        strncpy(st_unpack_buf.p_cmd_buf, "L", 1);
-        st_unpack_buf.p_cmd_buf[1] = '\0';  
+        memset(&stUnpackBuf, 0, BUFSIZE);
+        stUnpackBuf.m_pCmdBuf = (char *)malloc(BUFSIZE);
+        stUnpackBuf.m_pFileNameBuf = NULL;
+        stUnpackBuf.m_pFileDataBuf = NULL;
+        stUnpackBuf.has_m_uifilesize = 0;
+        strncpy(stUnpackBuf.m_pCmdBuf, "L", 1);
+        stUnpackBuf.m_pCmdBuf[1] = '\0';  
 
-        /*pack the origin data*/
-        i_pack_len = datadeal_proto_pack(&st_unpack_buf, &cp_pack_buf);
-        if (i_pack_len == FILEDATA_DEAL_RET_FAIL) {
-            file_error("[%s]datadeal_proto_pack is fail!\n", __FUNCTION__);
+        /*pack the origin uiData*/
+        iPackLen = DataDeal_protoPack(&stUnpackBuf, &pcPackBuf);
+        if (iPackLen == FILEDATA_DEAL_RET_FAIL) {
+            File_error("[%s]DataDeal_protoPack is fail!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        if (NULL != st_unpack_buf.p_cmd_buf) {
-            free(st_unpack_buf.p_cmd_buf);
+        if (NULL != stUnpackBuf.m_pCmdBuf) {
+            free(stUnpackBuf.m_pCmdBuf);
         } 
-        if (NULL != st_unpack_buf.p_filename_buf) {
-            free(st_unpack_buf.p_filename_buf);   
+        if (NULL != stUnpackBuf.m_pFileNameBuf) {
+            free(stUnpackBuf.m_pFileNameBuf);   
         }
-        if (NULL != st_unpack_buf.p_filedata_buf) {
-            free(st_unpack_buf.p_filedata_buf);   
+        if (NULL != stUnpackBuf.m_pFileDataBuf) {
+            free(stUnpackBuf.m_pFileDataBuf);   
         }
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_pack_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iPackLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the cmd pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, cp_pack_buf, i_pack_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the cmd pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, pcPackBuf, iPackLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send protobuf pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", cp_pack_buf);
-        file_printf("c_pack_buf_a size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_pack_buf[i]);
+        File_printf("Client_sendData send protobuf pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", pcPackBuf);
+        File_printf("cPackBuf size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcPackBuf[i]);
         }
 
-        if (NULL != cp_pack_buf) {
-            free(cp_pack_buf);
+        if (NULL != pcPackBuf) {
+            free(pcPackBuf);
         }
 
         /*recv file description from server*/
-        file_running("server file as follow:\n");
+        File_running("server file as follow:\n");
         while (1) {    
-            memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
-            i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
-            if (i_ret == FILE_CLIENT_ERROR) {
-                file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
+            memset(cFileNameBuf, 0, sizeof(cFileNameBuf));
+            iRet= Client_recvData(iConnectFd, cFileNameBuf, sizeof(cFileNameBuf));
+            if (iRet == FILE_CLIENT_ERROR) {
+                File_error("[%s]Client_recvData is fail\n", __FUNCTION__); 
                 return FILEDATA_DEAL_RET_OK;
             }
             
-            if (strncmp(c_filename_buf_a, "end", 3) == 0) {
-                file_printf("recv filename data complete!\n");
+            if (strncmp(cFileNameBuf, "end", 3) == 0) {
+                File_printf("recv filename uiData complete!\n");
                 break;
             }
             
-            file_running("%s\n", c_filename_buf_a);     
+            File_running("%s\n", cFileNameBuf);     
         }
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_JSON) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_JSON) {
         
-        cJSON *stp_cjson_root = cJSON_CreateObject();
-        char *cp_cjson_data_out = NULL;
-        int i_cjson_data_size = 0;
+        cJSON* pstCjsonRoot = cJSON_CreateObject();
+        char* pcCjsonDataOut = NULL;
+        int iCjsonDataSize = 0;
 
         /*pack the "L" cmd to the json structure*/
-        cJSON_AddStringToObject(stp_cjson_root, "string_cmd", "L");
+        cJSON_AddStringToObject(pstCjsonRoot, "string_cmd", "L");
         
-        /*output the json data to char*/
-        cp_cjson_data_out = cJSON_PrintUnformatted(stp_cjson_root);
+        /*output the json uiData to char*/
+        pcCjsonDataOut = cJSON_PrintUnformatted(pstCjsonRoot);
         
-        /*judge the data size of bytes*/
-        i_cjson_data_size = strlen(cp_cjson_data_out);
+        /*judge the uiData size of bytes*/
+        iCjsonDataSize = strlen(pcCjsonDataOut);
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = i_cjson_data_size + 1;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = iCjsonDataSize + 1;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the cmd cjson pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, cp_cjson_data_out, i_cjson_data_size + 1);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the cmd cjson pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, pcCjsonDataOut, iCjsonDataSize + 1);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        file_printf("client_send_data send cjson pack data %d bytes\n", i_send_bytes);
-        file_printf("cp_cjson_data_out = %s\n", cp_cjson_data_out);
-        file_printf("cp_cjson_data_out size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", cp_cjson_data_out[i]);
+        File_printf("Client_sendData send cjson pack uiData %d bytes\n", iSendBytes);
+        File_printf("pcCjsonDataOut = %s\n", pcCjsonDataOut);
+        File_printf("pcCjsonDataOut size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", pcCjsonDataOut[i]);
         }
 
-        cJSON_Delete(stp_cjson_root);
-        free(cp_cjson_data_out);
+        cJSON_Delete(pstCjsonRoot);
+        free(pcCjsonDataOut);
 
         /*recv file description from server*/
-        file_running("server file as follow:\n");
+        File_running("server file as follow:\n");
         while (1) {    
-            memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
-            i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
-            if (i_ret == FILE_CLIENT_ERROR) {
-                file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
+            memset(cFileNameBuf, 0, sizeof(cFileNameBuf));
+            iRet= Client_recvData(iConnectFd, cFileNameBuf, sizeof(cFileNameBuf));
+            if (iRet == FILE_CLIENT_ERROR) {
+                File_error("[%s]Client_recvData is fail\n", __FUNCTION__); 
                 return FILEDATA_DEAL_RET_FAIL;
             }
             
-            if (strncmp(c_filename_buf_a, "end", 3) == 0) {
-                file_printf("recv filename data complete!\n");
+            if (strncmp(cFileNameBuf, "end", 3) == 0) {
+                File_printf("recv filename uiData complete!\n");
                 break;
             }
             
-            file_running("%s\n", c_filename_buf_a);     
+            File_running("%s\n", cFileNameBuf);     
         }
     }
-    if (g_stTestHdr.en_module == MODULE_TEST_TLV) {
+    if (g_stTestHdr.m_enModule == MODULE_TEST_TLV) {
         
-        FILE_DATA_ST st_file_data;
-        char c_pack_buf_a[BUFSIZE];
-        unsigned int ui_tlv_totol_len = 0; 
-        int i_ret = TLV_ENCODE_RET_OK;
+        FileData_S stFileData;
+        char cPackBuf[BUFSIZE];
+        unsigned int uiTlvTotolLen = 0; 
+        int iRet = TLV_ENCODE_RET_OK;
 
-        /*pading the FILE_DATA_ST structure*/
-        memset(&st_file_data, 0, sizeof(FILE_DATA_ST));
-        strcpy(st_file_data.c_file_cmd, "L");
-        st_file_data.c_file_cmd[1] = '\0';
-        st_file_data.ui_data_totol_size = 12 + 12 + 4 + st_file_data.ui_file_size; 
+        /*pading the FileData_S structure*/
+        memset(&stFileData, 0, sizeof(FileData_S));
+        strcpy(stFileData.m_cFileCmd, "L");
+        stFileData.m_cFileCmd[1] = '\0';
+        stFileData.m_uiDataTotolSize = 12 + 12 + 4 + stFileData.m_uiFileSize; 
 
-        /*tlv encode the st_file_data*/
-        i_ret = tlv_encode_file(&st_file_data, c_pack_buf_a, &ui_tlv_totol_len, BUFSIZE);
-        if (TLV_ENCODE_RET_FAIL == i_ret) {
-            file_error("[%s]tlv_encode_file is fail\n", __FUNCTION__); 
+        /*tlv encode the stFileData*/
+        iRet = tlvEncodeFile(&stFileData, cPackBuf, &uiTlvTotolLen, BUFSIZE);
+        if (TLV_ENCODE_RET_FAIL == iRet) {
+            File_error("[%s]tlvEncodeFile is fail\n", __FUNCTION__); 
             return FILEDATA_DEAL_RET_FAIL;
         }
 
         /*pading the g_stTestHdr structure*/
-        g_stTestHdr.en_version = VERSION_ONE;
-        g_stTestHdr.ui_dat_len = ui_tlv_totol_len;
-        g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+        g_stTestHdr.m_enVersion = VERSION_ONE;
+        g_stTestHdr.m_uiDataLen = uiTlvTotolLen;
+        g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
         /*sned the g_stTestHdr*/
-        i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-        if (i_ret == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+        if (iRet == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
-        file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes);
+        File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes);
 
-        /*sned the cmd tlv pack data*/
-        i_send_bytes = client_send_data(i_connect_fd, c_pack_buf_a, ui_tlv_totol_len);
-        if (i_send_bytes == FILE_CLIENT_ERROR) {
-            file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+        /*sned the cmd tlv pack uiData*/
+        iSendBytes = Client_sendData(iConnectFd, cPackBuf, uiTlvTotolLen);
+        if (iSendBytes == FILE_CLIENT_ERROR) {
+            File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;
         }
 
-        file_printf("client_send_data send tlv pack data %d bytes\n", i_send_bytes);
-        file_printf("c_pack_buf_a = %s\n", c_pack_buf_a);
-        file_printf("ui_tlv_totol_len size = %d\n", g_stTestHdr.ui_dat_len);
-        for (int i = 0; i < g_stTestHdr.ui_dat_len; i++) {
-            file_printf("%hhX\n", c_pack_buf_a[i]);
+        File_printf("Client_sendData send tlv pack uiData %d bytes\n", iSendBytes);
+        File_printf("cPackBuf = %s\n", cPackBuf);
+        File_printf("uiTlvTotolLen size = %d\n", g_stTestHdr.m_uiDataLen);
+        for (int i = 0; i < g_stTestHdr.m_uiDataLen; i++) {
+            File_printf("%hhX\n", cPackBuf[i]);
         }
 
         /*recv file description from server*/
-        file_running("server file as follow:\n");
+        File_running("server file as follow:\n");
         while (1) {    
-            memset(c_filename_buf_a, 0, sizeof(c_filename_buf_a));
-            i_ret= client_recv_data(i_connect_fd, c_filename_buf_a, sizeof(c_filename_buf_a));
-            if (i_ret == FILE_CLIENT_ERROR) {
-                file_error("[%s]client_recv_data is fail\n", __FUNCTION__); 
+            memset(cFileNameBuf, 0, sizeof(cFileNameBuf));
+            iRet= Client_recvData(iConnectFd, cFileNameBuf, sizeof(cFileNameBuf));
+            if (iRet == FILE_CLIENT_ERROR) {
+                File_error("[%s]Client_recvData is fail\n", __FUNCTION__); 
                 return FILEDATA_DEAL_RET_FAIL;
             }
             
-            if (strncmp(c_filename_buf_a, "end", 3) == 0) {
-                file_printf("recv filename data complete!\n");
+            if (strncmp(cFileNameBuf, "end", 3) == 0) {
+                File_printf("recv filename uiData complete!\n");
                 break;
             }
             
-            file_running("%s\n", c_filename_buf_a);     
+            File_running("%s\n", cFileNameBuf);     
         }
     }   
 }
 
-int datadeal_file_exit(int i_connect_fd)
+int datadeal_file_exit(int iConnectFd)
 {
-    int i_ret = FILE_CLIENT_OK;
-    int i_send_bytes = 0;
+    int iRet = FILE_CLIENT_OK;
+    int iSendBytes = 0;
 
     /*pading the g_stTestHdr structure*/
-    g_stTestHdr.en_version = VERSION_ONE;
-    g_stTestHdr.ui_dat_len = 0;
-    g_stTestHdr.us_hdr_len = sizeof(g_stTestHdr);
+    g_stTestHdr.m_enVersion = VERSION_ONE;
+    g_stTestHdr.m_uiDataLen = 0;
+    g_stTestHdr.m_usHdrLen = sizeof(g_stTestHdr);
 
     /*sned the g_stTestHdr*/
-    i_send_bytes = client_send_data(i_connect_fd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
-    if (i_ret == FILE_CLIENT_ERROR) {
-        file_error("[%s]client_send_data is fail\n", __FUNCTION__);
+    iSendBytes = Client_sendData(iConnectFd, (char *)&g_stTestHdr, sizeof(g_stTestHdr));
+    if (iRet == FILE_CLIENT_ERROR) {
+        File_error("[%s]Client_sendData is fail\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;
     }
-    file_printf("client_send_data send hdr data %d bytes\n", i_send_bytes); 
+    File_printf("Client_sendData send hdr uiData %d bytes\n", iSendBytes); 
 
     return FILESTATE_MAX;
 }
 
 /************************************************************
-* FUNCTION            :datadeal_proto_pack()
-* Description         :Encode data with protobuf protocol
+* FUNCTION            :DataDeal_protoPack()
+* Description         :Encode uiData with protobuf protocol
 * Arguments           :
-* [stp_unpack_buf][IN]:Point to the memory where the original 
-*                      data is stored
-* [cp_pack_buf][OUT]  :Save the packaged data
-* return              :Returns the size of the packed data
+* [pstUnpackBuf][IN]:Point to the memory where the original 
+*                      uiData is stored
+* [pcPackBuf][OUT]  :Save the packaged uiData
+* return              :Returns the size of the packed uiData
 ************************************************************/
-int datadeal_proto_pack(FILEDATA *stp_unpack_buf, char **cp_pack_buf)
+int DataDeal_protoPack(FILEDATA *pstUnpackBuf, char **pcPackBuf)
 {
-    assert(NULL != stp_unpack_buf);
-    assert(NULL != cp_pack_buf);
+    assert(NULL != pstUnpackBuf);
+    assert(NULL != pcPackBuf);
 
-    FILEDATA st_unpack_data;
-    size_t filedata_len = 0;
+    FILEDATA stUnpackData;
+    size_t fileDataLen = 0;
 
-    /*init the st_unpack_data*/
-    file__data__init(&st_unpack_data);
+    /*init the stUnpackData*/
+    file__data__init(&stUnpackData);
 
-    /*padding data*/
-    if (NULL != stp_unpack_buf->p_cmd_buf)
+    /*padding uiData*/
+    if (NULL != pstUnpackBuf->m_pCmdBuf)
     {    
-        st_unpack_data.p_cmd_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_data.p_cmd_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+        stUnpackData.m_pCmdBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackData.m_pCmdBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;  
         } 
-        strncpy(st_unpack_data.p_cmd_buf, stp_unpack_buf->p_cmd_buf, BUFSIZE);  
+        strncpy(stUnpackData.m_pCmdBuf, pstUnpackBuf->m_pCmdBuf, BUFSIZE);  
     } else {
-        st_unpack_data.p_cmd_buf = NULL;
+        stUnpackData.m_pCmdBuf = NULL;
     }
     
-    if (NULL != stp_unpack_buf->p_filename_buf) {
-        st_unpack_data.p_filename_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_data.p_filename_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+    if (NULL != pstUnpackBuf->m_pFileNameBuf) {
+        stUnpackData.m_pFileNameBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackData.m_pFileNameBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;  
         } 
-        strncpy(st_unpack_data.p_filename_buf, stp_unpack_buf->p_filename_buf, BUFSIZE);    
+        strncpy(stUnpackData.m_pFileNameBuf, pstUnpackBuf->m_pFileNameBuf, BUFSIZE);    
     } else {
-        st_unpack_data.p_filename_buf = NULL;
+        stUnpackData.m_pFileNameBuf = NULL;
     }
 
-    if (NULL != stp_unpack_buf->p_filedata_buf) {
-        st_unpack_data.p_filedata_buf = (char *)malloc(BUFSIZE);
-        if (NULL == st_unpack_data.p_filedata_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+    if (NULL != pstUnpackBuf->m_pFileDataBuf) {
+        stUnpackData.m_pFileDataBuf = (char *)malloc(BUFSIZE);
+        if (NULL == stUnpackData.m_pFileDataBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;  
         } 
-        strncpy(st_unpack_data.p_filedata_buf, stp_unpack_buf->p_filedata_buf, BUFSIZE);    
+        strncpy(stUnpackData.m_pFileDataBuf, pstUnpackBuf->m_pFileDataBuf, BUFSIZE);    
     } else {
-        st_unpack_data.p_filedata_buf = NULL;
+        stUnpackData.m_pFileDataBuf = NULL;
     }
 
-    /*get size of pack data*/
-    filedata_len = file__data__get_packed_size(&st_unpack_data);
+    /*get size of pack uiData*/
+    fileDataLen = file__data__get_packed_size(&stUnpackData);
 
-    *cp_pack_buf = (char *)malloc(filedata_len);
-    if (NULL == *cp_pack_buf)
+    *pcPackBuf = (char *)malloc(fileDataLen);
+    if (NULL == *pcPackBuf)
     {
-        file_error("[%s]malloc is error!\n", __FUNCTION__);
+        File_error("[%s]malloc is error!\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;
     }
 
-    file__data__pack(&st_unpack_data, *cp_pack_buf);
+    file__data__pack(&stUnpackData, *pcPackBuf);
 
-    if (NULL != st_unpack_data.p_cmd_buf) {
-        free(st_unpack_data.p_cmd_buf);    
+    if (NULL != stUnpackData.m_pCmdBuf) {
+        free(stUnpackData.m_pCmdBuf);    
     }
-    if (NULL != st_unpack_data.p_filename_buf) {
-        free(st_unpack_data.p_filename_buf);     
+    if (NULL != stUnpackData.m_pFileNameBuf) {
+        free(stUnpackData.m_pFileNameBuf);     
     }
-    if (NULL != st_unpack_data.p_filedata_buf) {
-        free(st_unpack_data.p_filedata_buf);     
+    if (NULL != stUnpackData.m_pFileDataBuf) {
+        free(stUnpackData.m_pFileDataBuf);     
     }
     
-    return filedata_len;
+    return fileDataLen;
 }
 
 /************************************************************
-* FUNCTION             :datadeal_proto_unpack()
-* Description          :Decode data with protobuf protocol
+* FUNCTION             :DataDeal_protoUnpack()
+* Description          :Decode uiData with protobuf protocol
 * Arguments:
-* [cp_pack_buf][IN]    :Data to be unpacked
-* [stp_unpack_buf][OUT]:Store the unpacked data
+* [pcPackBuf][IN]    :Data to be unpacked
+* [pstUnpackBuf][OUT]:Store the unpacked uiData
 * return               :success return FILEDATA_DEAL_RET_OK 
 *                       and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
-int datadeal_proto_unpack(char *cp_pack_buf, FILEDATA *stp_unpack_buf, int i_size)
+int DataDeal_protoUnpack(char *pcPackBuf, FILEDATA *pstUnpackBuf, int iSize)
 {
-    assert(NULL != cp_pack_buf);  
-    assert(NULL != stp_unpack_buf);
+    assert(NULL != pcPackBuf);  
+    assert(NULL != pstUnpackBuf);
 
-    FILEDATA *st_unpack_data = NULL;
+    FILEDATA* stUnpackData = NULL;
 
-    st_unpack_data = file__data__unpack(NULL, i_size, cp_pack_buf);
-    if (NULL == st_unpack_data) {
-        file_error("[%s]file__data__unpack is error!\n", __FUNCTION__);
+    stUnpackData = file__data__unpack(NULL, iSize, pcPackBuf);
+    if (NULL == stUnpackData) {
+        File_error("[%s]file__data__unpack is error!\n", __FUNCTION__);
         return FILEDATA_DEAL_RET_FAIL;    
     }
   
-    if (NULL != st_unpack_data->p_cmd_buf) {
-        stp_unpack_buf->p_cmd_buf = (char *)malloc(i_size + 1);
-        if (NULL == stp_unpack_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+    if (NULL != stUnpackData->m_pCmdBuf) {
+        pstUnpackBuf->m_pCmdBuf = (char *)malloc(iSize + 1);
+        if (NULL == pstUnpackBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
-        strcpy(stp_unpack_buf->p_cmd_buf, st_unpack_data->p_cmd_buf);    
+        strcpy(pstUnpackBuf->m_pCmdBuf, stUnpackData->m_pCmdBuf);    
     }
 
-    if (NULL != st_unpack_data->p_filename_buf) {
-        stp_unpack_buf->p_filename_buf = (char *)malloc(i_size + 1);
-        if (NULL == stp_unpack_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+    if (NULL != stUnpackData->m_pFileNameBuf) {
+        pstUnpackBuf->m_pFileNameBuf = (char *)malloc(iSize + 1);
+        if (NULL == pstUnpackBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
-        strcpy(stp_unpack_buf->p_filename_buf, st_unpack_data->p_filename_buf);    
+        strcpy(pstUnpackBuf->m_pFileNameBuf, stUnpackData->m_pFileNameBuf);    
     }
 
-    if (NULL != st_unpack_data->p_filedata_buf) {
-        stp_unpack_buf->p_filedata_buf = (char *)malloc(i_size + 1);
-        if (NULL == stp_unpack_buf) {
-            file_error("[%s]malloc is error!\n", __FUNCTION__);
+    if (NULL != stUnpackData->m_pFileDataBuf) {
+        pstUnpackBuf->m_pFileDataBuf = (char *)malloc(iSize + 1);
+        if (NULL == pstUnpackBuf) {
+            File_error("[%s]malloc is error!\n", __FUNCTION__);
             return FILEDATA_DEAL_RET_FAIL;    
         }
-        strcpy(stp_unpack_buf->p_filedata_buf, st_unpack_data->p_filedata_buf);    
+        strcpy(pstUnpackBuf->m_pFileDataBuf, stUnpackData->m_pFileDataBuf);    
     }
 
-    file__data__free_unpacked(st_unpack_data,NULL);
+    file__data__free_unpacked(stUnpackData,NULL);
 
     return FILEDATA_DEAL_RET_OK;
 }

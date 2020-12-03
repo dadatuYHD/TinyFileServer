@@ -7,17 +7,17 @@
 #define FILE_CLIENT_EWOULDBLOCK     2
 
 
-typedef struct sockaddr SA;
-typedef struct sockaddr_in SA_I;
+typedef struct sockaddr SA_S;
+typedef struct sockaddr_in SAI_S;
 
-int client_init_socket(void);
+int Client_initSocket(void);
 
-int client_send_request(int iPort, char *cpServerIp);
+int Client_sendReq(int iPort, char* pcServerIp);
 
-int client_data_interaction(void);
+int Client_dataInteraction(void);
 
-int client_send_data(int i_connect_fd, void *p_buf, int i_bufsize);
-int client_recv_data(int i_connect_fd, void *p_buf, int i_bufsize);
+int Client_sendData(int iConnectFd, void* pBuf, int iBufSize);
+int Client_recvData(int iConnectFd, void* pBuf, int iBufSize);
 
 
 

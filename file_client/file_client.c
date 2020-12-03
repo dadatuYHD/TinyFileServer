@@ -22,11 +22,11 @@
 
 int g_iConnectFd = 0;
 
-int client_init_socket(void)
+int Client_initSocket(void)
 {
     int iRet = 0;
 #if 0
-    SA_I stClientAddr;
+    SAI_S stClientAddr;
 
     memset(&stClientAddr, 0, sizeof(stClientAddr));
     stClientAddr.sin_family = AF_INET;
@@ -37,14 +37,14 @@ int client_init_socket(void)
     g_iConnectFd = socket(AF_INET, SOCK_STREAM, 0);
     if (-1 == g_iConnectFd)
     {
-        file_error("socket create is faileed!\n");
+        File_error("socket create is faileed!\n");
         return FILE_CLIENT_ERROR;
     }
 #if 0
-    iRet = bind(g_iConnectFd, (SA *)&stClientAddr, sizeof(stClientAddr));
+    iRet = bind(g_iConnectFd, (SA_S *)&stClientAddr, sizeof(stClientAddr));
     if (-1 == iRet)
     {
-        file_error("bind is failed!\n");
+        File_error("bind is failed!\n");
         close(g_iConnectFd);
         return FILE_CLIENT_ERROR;
     }
@@ -52,20 +52,20 @@ int client_init_socket(void)
     return FILE_CLIENT_OK;
 }
 
-int client_send_request(int iPort, char *cpServerIp)
+int Client_sendReq(int iPort, char* pcServerIp)
 {
-    SA_I stServerAddr;
+    SAI_S stServerAddr;
     int iRet = FILE_CLIENT_OK;
 
     memset(&stServerAddr, 0, sizeof(stServerAddr));
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_port = htons(iPort); 
-    inet_pton(AF_INET, cpServerIp, &stServerAddr.sin_addr.s_addr);
+    inet_pton(AF_INET, pcServerIp, &stServerAddr.sin_addr.s_addr);
 
-    iRet = connect(g_iConnectFd, (SA *)&stServerAddr, sizeof(stServerAddr));
+    iRet = connect(g_iConnectFd, (SA_S *)&stServerAddr, sizeof(stServerAddr));
     if (-1 == iRet)
     {
-        file_error("connect is failed!\n");
+        File_error("connect is failed!\n");
         close(g_iConnectFd);
         return FILE_CLIENT_ERROR;
     }
@@ -73,49 +73,49 @@ int client_send_request(int iPort, char *cpServerIp)
     return FILE_CLIENT_OK;
 }
 
-int client_data_interaction(void)
+int Client_dataInteraction(void)
 {
-    int i_ret = FILE_CLIENT_OK;   
-    char cBuf_a[BUF_SIZE];
-    TEST_HDR_T st_test_hdr;
+    int iRet = FILE_CLIENT_OK;   
+    char cBuf[BUF_SIZE];
+    TestHdr_S stTestHdr;
 
-    memset(&st_test_hdr, 0, sizeof(st_test_hdr));
-    st_test_hdr = datadeal_get_hdr();
-    if (st_test_hdr.en_cmd == CMD_TEST_SET)
+    memset(&stTestHdr, 0, sizeof(stTestHdr));
+    stTestHdr = DataDeal_getHdr();
+    if (stTestHdr.m_enCmd == CMD_TEST_SET)
     {
-        i_ret = datadeal_file_set(g_iConnectFd);
-        if (i_ret == FILEDATA_DEAL_RET_FAIL)
+        iRet = DataDeal_setFile(g_iConnectFd);
+        if (iRet == FILEDATA_DEAL_RET_FAIL)
         {
-            file_error("[%s]datadeal_file_set is failed!\n", __FUNCTION__);
+            File_error("[%s]DataDeal_setFile is failed!\n", __FUNCTION__);
             return FILE_CLIENT_ERROR;
         }
     }
-    if (st_test_hdr.en_cmd == CMD_TEST_GET)
+    if (stTestHdr.m_enCmd == CMD_TEST_GET)
     {
-        i_ret = datadeal_file_get(g_iConnectFd);
-        if (i_ret == FILEDATA_DEAL_RET_FAIL)
+        iRet = DataDeal_getFile(g_iConnectFd);
+        if (iRet == FILEDATA_DEAL_RET_FAIL)
         {
-            file_error("[%s]datadeal_file_get is failed!\n", __FUNCTION__);
+            File_error("[%s]DataDeal_getFile is failed!\n", __FUNCTION__);
             return FILE_CLIENT_ERROR;
         }    
     }
-    if (st_test_hdr.en_cmd == CMD_TEST_LIST)
+    if (stTestHdr.m_enCmd == CMD_TEST_LIST)
     {
-        i_ret = datadeal_file_list(g_iConnectFd);
-        if (i_ret == FILEDATA_DEAL_RET_FAIL)
+        iRet = datadeal_file_list(g_iConnectFd);
+        if (iRet == FILEDATA_DEAL_RET_FAIL)
         {
-            file_error("[%s]datadeal_file_list is failed!\n", __FUNCTION__);
+            File_error("[%s]datadeal_file_list is failed!\n", __FUNCTION__);
             return FILE_CLIENT_ERROR;
         }     
     }
-    if (st_test_hdr.en_cmd == CMD_TEST_CLIENT_EXIT)
+    if (stTestHdr.m_enCmd == CMD_TEST_CLIENT_EXIT)
     {
-        i_ret = datadeal_file_exit(g_iConnectFd);
-        if (i_ret == FILEDATA_DEAL_RET_FAIL)
+        iRet = datadeal_file_exit(g_iConnectFd);
+        if (iRet == FILEDATA_DEAL_RET_FAIL)
         {
-            file_error("[%s]datadeal_file_list is failed!\n", __FUNCTION__);
+            File_error("[%s]datadeal_file_list is failed!\n", __FUNCTION__);
             return FILE_CLIENT_ERROR;
-        } else if (FILESTATE_MAX == i_ret) {
+        } else if (FILESTATE_MAX == iRet) {
             return  FILESTATE_MAX;  
         } else {
             /*************/
@@ -126,71 +126,71 @@ int client_data_interaction(void)
 }
 
 /************************************************************
-* FUNCTION          :client_send_data
-* Description       :by socket file descriptor send data
+* FUNCTION          :Client_sendData
+* Description       :by socket file descriptor send uiData
 * Arguments         :
-* [i_connect_fd][IN]:file descriptor
-* [p_buf][IN]       :Store data to be send
-* [p_buf][IN]       :size of to be send
+* [iConnectFd][IN]:file descriptor
+* [pBuf][IN]       :Store uiData to be send
+* [pBuf][IN]       :size of to be send
 * return            :success return bytes of send，
 *                    fail return FILE_CLIENT_ERROR
 ************************************************************/
-int client_send_data(int i_connect_fd, void *p_buf, int i_bufsize)
+int Client_sendData(int iConnectFd, void* pBuf, int iBufSize)
 {
-    assert(NULL != p_buf);
+    assert(NULL != pBuf);
 
-    int i_send_bytes = 0;
-    int i_total_send_bytes = 0;
+    int iSendBytes = 0;
+    int iTotalSendBytes = 0;
 
-    while (i_total_send_bytes < i_bufsize)
+    while (iTotalSendBytes < iBufSize)
     {
-        i_send_bytes = send(i_connect_fd, (char *)p_buf, i_bufsize - i_total_send_bytes, 0);
-        if (-1 == i_send_bytes)
+        iSendBytes = send(iConnectFd, (char *)pBuf, iBufSize - iTotalSendBytes, 0);
+        if (-1 == iSendBytes)
         {
             perror("send");
             return FILE_CLIENT_ERROR;
         }
 
-        i_total_send_bytes += i_send_bytes;
+        iTotalSendBytes += iSendBytes;
     }
 
-    return i_total_send_bytes;
+    return iTotalSendBytes;
 }
 
 /************************************************************
-* FUNCTION          :client_recv_data
-* Description       :by socket file descriptor recv data
+* FUNCTION          :Client_recvData
+* Description       :by socket file descriptor recv uiData
 * Arguments         :
-* [i_connect_fd][IN]:file descriptor
-* [p_buf][IN]       :Store data to be recv
-* [p_buf][IN]       :size of to be recv
+* [iConnectFd][IN]:file descriptor
+* [pBuf][IN]       :Store uiData to be recv
+* [pBuf][IN]       :size of to be recv
 * return            :success return bytes of recv，fail 
 *                    return FILE_CLIENT_ERROR
 ************************************************************/
-int client_recv_data(int i_connect_fd, void *p_buf, int i_bufsize)
+int Client_recvData(int iConnectFd, void* pBuf, int iBufSize)
 {
-    assert(NULL != p_buf);
+    assert(NULL != pBuf);
 
-    int i_recv_bytes = 0;
-    int i_total_recv_bytes = 0;
-    int i_ret = FILE_CLIENT_OK;
+    int iRecvBytes = 0;
+    int iTotalRecvBytes = 0;
+    int iRet = FILE_CLIENT_OK;
 
-    while (i_total_recv_bytes < i_bufsize) {
-        i_recv_bytes = recv(i_connect_fd, (char *)p_buf, i_bufsize - i_total_recv_bytes, 0);
-        if (-1 == i_recv_bytes) {
+    while (iTotalRecvBytes < iBufSize) {
+        iRecvBytes = recv(iConnectFd, (char *)pBuf, iBufSize - iTotalRecvBytes, 0);
+        if (-1 == iRecvBytes) {
             perror("recv");
-            file_error("[%s]recv is failed!\n", __FUNCTION__);
-            close(i_connect_fd);
+            File_error("[%s]recv is failed!\n", __FUNCTION__);
+            close(iConnectFd);
             return FILE_CLIENT_ERROR;    
-        } else if (0 == i_recv_bytes) {
-            file_running("peer is shutdown\n");
-            close(i_connect_fd);
+        } else if (0 == iRecvBytes) {
+            File_running("peer is shutdown\n");
+            close(iConnectFd);
             return FILE_CLIENT_RECV_PEER_DOWN;
         } else {
-            i_total_recv_bytes += i_recv_bytes;
+            iTotalRecvBytes += iRecvBytes;
         }     
     }
 
-    return i_total_recv_bytes;
+    return iTotalRecvBytes;
 }
 

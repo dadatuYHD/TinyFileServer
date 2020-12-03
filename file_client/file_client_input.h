@@ -2,7 +2,7 @@
 *   Copyright (C) 2017 All rights reserved.
 *
 *   Filename:CalcInput.h
-*   Author  :叶鸿达
+*   Author  :yhd
 *   Date    :2017-04-30
 *   Describe:
 *
@@ -18,14 +18,14 @@
 #define FILEINPUT_EXIT                  (-4)
 #define FILEINPUT_RET_INPUT_SCORE_FAIL  (-5)
 
-int file_input_int(unsigned int * uipInputInt);
+int File_inputInt(unsigned int* puiInputInt);
 
-int file_input_char(char * pcOperator);
+int File_inputChar(char* pcOperator);
 
-int file_input_string(char * pcInputBuf);
+int File_inputString(char* pcInputBuf);
 
-int file_input_module_numcheck(unsigned int uipInputInt);
-int file_input_cmd_numcheck(unsigned int uipInputInt);
+int File_inputModuleNumCheck(unsigned int uiInputInt);
+int File_inputCmdMumCheck(unsigned int uiInputInt);
 
 
 
