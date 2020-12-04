@@ -29,7 +29,7 @@ struct  _FILEDATA
   char* m_pCmdBuf;
   char* m_pFileNameBuf;
   char* m_pFileDataBuf;
-  protobuf_c_boolean has_m_uifilesize;
+  protobuf_c_boolean has_m_uiFileSize;
   uint32_t m_uiFileSize;
 };
 #define FILE__DATA__INIT \

@@ -95,7 +95,7 @@ static const ProtobufCFieldDescriptor file__data__field_descriptors[4] =
     4,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_UINT32,
-    offsetof(FILEDATA, has_m_uifilesize),
+    offsetof(FILEDATA, has_m_uiFileSize),
     offsetof(FILEDATA, m_uiFileSize),
     NULL,
     NULL,

@@ -1,6 +1,6 @@
-target = file_server
+target = FileServer
 
 $(target): *.c *.h
 	gcc $^ -o $@ -lpthread -lprotobuf-c -lcjson -g -std=c99
 clean:
-	rm -rf file_server
+	rm -rf FileServer
