@@ -9,9 +9,9 @@
 
 typedef enum {
     VERSION_ONE = 1,
-	VERSION_TWO,
-	VERSION_THIRD,
-	VERSION_MAX,
+    VERSION_TWO,
+    VERSION_THIRD,
+    VERSION_MAX,
 }VERSION_E;
 
 /**********************************
@@ -20,19 +20,19 @@ typedef enum {
  *********************************/
 typedef enum {
     HDR_FIELD_VERSION = 1,
-	HDR_FIELD_HDR_LEN,
-	HDR_FIELD_DATA_LEN,
-	HDR_FIELD_MODULE,
-	HDR_FIELD_CMD,
+    HDR_FIELD_HDR_LEN,
+    HDR_FIELD_DATA_LEN,
+    HDR_FIELD_MODULE,
+    HDR_FIELD_CMD,
 }HDR_FIELD_FLG ;
 
 
 /*Header uiData exchange format*/
 typedef enum  {
-	MODULE_TEST_PROTO = 0,
-	MODULE_TEST_TLV,
-	MODULE_TEST_JSON,
-	MODULE_MAX,
+    MODULE_TEST_PROTO = 0,
+    MODULE_TEST_TLV,
+    MODULE_TEST_JSON,
+    MODULE_MAX,
 }MODULE_E;
 
 /*Head command definition*/
@@ -46,12 +46,12 @@ typedef enum {
 
 /*Data header declaration*/
 typedef struct TestHdr_S {
-	VERSION_E      m_enVersion;     // The header version is tentatively set to one, 
+    VERSION_E      m_enVersion;     // The header version is tentatively set to one, 
                                    // and needs to be verified after receipt
-	unsigned short m_usHdrLen;     // Header length needs to be verified after receipt
-	unsigned int   m_uiDataLen;	   // Load uiData length
-	MODULE_E       m_enModule;	   // Current business module
-	CMD_E          m_enCmd;	       // Command number under the module
+    unsigned short m_usHdrLen;     // Header length needs to be verified after receipt
+    unsigned int   m_uiDataLen;    // Load uiData length
+    MODULE_E       m_enModule;     // Current business module
+    CMD_E          m_enCmd;        // Command number under the module
 }TestHdr_S;                   
 
 /*Head processing function declaration*/

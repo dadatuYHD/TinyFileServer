@@ -23,7 +23,7 @@ int writeInt(unsigned int uiData, char** pcDst, char *pcEndData)
     
     iRet = writeBlock(pcDst, sizeof(int), &uiNetData, pcEndData);
     if (TLV_ENCODE_RET_FAIL == iRet) 
-	{
+    {
         File_error("[%s]writeBlock over lap!\n", __FUNCTION__);
         return TLV_ENCODE_RET_FAIL;
     }
@@ -44,7 +44,7 @@ int readInt(unsigned     int* uiData, char** pcSrc, char* pcEndData)
 
     iRet = readBlock(uiData, pcSrc, sizeof(int), pcEndData);
     if (TLV_DECODE_RET_FAIL == iRet) 
-	{
+    {
         File_error("[%s]readBlock over lap!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
@@ -128,7 +128,7 @@ int tlvDecodeFile(char* pcBuf, unsigned int uiTlvTotolLen,FileData_Sp pstFileDat
 
     readInt(&enTlvType, &pcReadData, pcEndData);
     if (TLV_FILE_ROOT != enTlvType) 
-	{
+    {
         File_error("[%s]read TLV_FILE_ROOT is fail!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
@@ -136,11 +136,11 @@ int tlvDecodeFile(char* pcBuf, unsigned int uiTlvTotolLen,FileData_Sp pstFileDat
     readInt(&uiTlvLenSum, &pcReadData, pcEndData);
 
     while (uiTlvLenSum > 0) 
-	{
+    {
         readInt(&enTlvType, &pcReadData, pcEndData);
         readInt(&uiTlvLen, &pcReadData, pcEndData);
         switch (enTlvType) 
-		{
+        {
             case TLV_FILE_CMD:          
                 readBlock(pstFileData->m_cFileCmd, &pcReadData,  uiTlvLen, pcEndData);
                 uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);

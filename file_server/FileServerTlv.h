@@ -17,11 +17,11 @@ typedef enum {
 }FILE_TEST_EN;
 
 typedef struct FileData_S {
-	char   m_cFileCmd[12];
+    char   m_cFileCmd[12];
     char   m_cFileName[12];
-	char * m_pcFileContent;
-	unsigned int m_uiFileSize;
-	unsigned int m_uiDataTotolSize;
+    char * m_pcFileContent;
+    unsigned int m_uiFileSize;
+    unsigned int m_uiDataTotolSize;
 }FileData_S, *FileData_Sp;
 
 int tlvEncodeFile(FileData_Sp pstFileData, char* pcBuf, unsigned int* puiTlvTotolLen, unsigned int uiBufLen);

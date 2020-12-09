@@ -114,12 +114,12 @@ int Client_dataInteraction(void)
             File_error("[%s]DataDeal_listFile is failed!\n", __FUNCTION__);
             return FILE_CLIENT_ERROR;
         } 
-		else if (FILESTATE_MAX == iRet) 
-		{
+        else if (FILESTATE_MAX == iRet) 
+        {
             return  FILESTATE_MAX;  
         } 
-		else 
-		{
+        else 
+        {
             /*************/
         }
     }
@@ -178,23 +178,23 @@ int Client_recvData(int iConnectFd, void* pBuf, int iBufSize)
     int iRet = FILE_CLIENT_OK;
 
     while (iTotalRecvBytes < iBufSize) 
-	{
+    {
         iRecvBytes = recv(iConnectFd, (char *)pBuf, iBufSize - iTotalRecvBytes, 0);
         if (-1 == iRecvBytes) 
-		{
+        {
             perror("recv");
             File_error("[%s]recv is failed!\n", __FUNCTION__);
             close(iConnectFd);
             return FILE_CLIENT_ERROR;    
         } 
-		else if (0 == iRecvBytes) 
-		{
+        else if (0 == iRecvBytes) 
+        {
             File_running("peer is shutdown\n");
             close(iConnectFd);
             return FILE_CLIENT_RECV_PEER_DOWN;
         } 
-		else 
-		{
+        else 
+        {
             iTotalRecvBytes += iRecvBytes;
         }     
     }

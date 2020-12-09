@@ -54,7 +54,7 @@ void fileStateMain(void)
 int File_stateTcpInit(int iState)
 {
     if (iState != FILESTATE_TCP_INIT) 
-	{
+    {
         File_error("[%s]File_stateTcpInit is fail!\n", __FUNCTION__);
         return FILESTATE_TCP_INIT;
     }
@@ -84,7 +84,7 @@ int File_stateTcpInit(int iState)
 int File_stateSelModule(int iState)
 {
     if (iState != FILESTATE_MODULE) 
-	{
+    {
         File_error("[%s]File_stateSelModule is fail!\n", __FUNCTION__);
         return FILESTATE_MODULE;
     }
@@ -270,11 +270,11 @@ int File_stateDataDeal(int iState)
         File_error("[%s]data_interaction is failed!\n", __FUNCTION__);
         return FILE_CLIENT_ERROR;   
     } 
-	else if (FILESTATE_MAX == iRet) 
-	{
+    else if (FILESTATE_MAX == iRet) 
+    {
         return  FILESTATE_MAX;  
     } else 
-	{
+    {
             /*************/
     }
 
