@@ -52,14 +52,14 @@ TestHdr_S * DataDeal_getHdrAddress(void)
 
 
 /*******************************************************************
-* FUNCTION          :DataDeal_setHdr()
-* Description       :Set global variable g_stTestHdr between modules
-* Arguments         :
+* FUNCTION        :DataDeal_setHdr()
+* Description     :Set global variable g_stTestHdr between modules
+* Arguments       :
 * [pstTestHdr][IN]:Point to a TestHdr_S structure to store the 
-*                    uiData to be set
-* [enFlg][IN]      :Set the enFlg
-* return            :success return FILEDATA_DEAL_RET_OK, return 
-*                    FILEDATA_DEAL_RET_FAIL
+*                  uiData to be set
+* [enFlg][IN]     :Set the enFlg
+* return          :success return FILEDATA_DEAL_RET_OK, return 
+*                  FILEDATA_DEAL_RET_FAIL
 *******************************************************************/
 int DataDeal_setHdr(TestHdr_S* pstTestHdr, HDR_FIELD_FLG enFlg)
 {
@@ -97,8 +97,8 @@ int DataDeal_setHdr(TestHdr_S* pstTestHdr, HDR_FIELD_FLG enFlg)
 * FUNCTION    :DataDeal_fileRead()
 * Description :Read file contents
 * Arguments   :
-* [iFd][IN]  :File descriptor
-* [pBuf][OUT]   :Buf to store the contents of the file
+* [iFd][IN]   :File descriptor
+* [pBuf][OUT] :Buf to store the contents of the file
 * [nBytes][IN]:File size to be read
 * return      :Returns the total bytes read
 ************************************************************/
@@ -107,9 +107,11 @@ int DataDeal_fileRead(int iFd, void * pBuf, ssize_t nBytes)
     ssize_t totalReadBytes = 0;
     ssize_t readBytes = 0;
 
-    while (totalReadBytes < nBytes) {
+    while (totalReadBytes < nBytes) 
+	{
         readBytes = read(iFd, pBuf, nBytes - totalReadBytes); 
-        if (-1 == readBytes) {
+        if (-1 == readBytes) 
+		{
             perror("read");
             return FILEDATA_DEAL_RET_FAIL;
         }
@@ -125,8 +127,8 @@ int DataDeal_fileRead(int iFd, void * pBuf, ssize_t nBytes)
 * Description :Write uiData to the file specified by the file 
 *              descriptor
 * Arguments   :
-* [iFd][IN]  :File descriptor
-* [pBuf][IN]   :Buf to store the file uiData to be read
+* [iFd][IN]   :File descriptor
+* [pBuf][IN]  :Buf to store the file uiData to be read
 * [nBytes][IN]:The size of the file to be written
 * return      :Return the total bytes written
 ************************************************************/
@@ -135,9 +137,11 @@ int DataDeal_fileWrite(int iFd, const void * pBuf, ssize_t nBytes)
     ssize_t totalWriteBytes = 0;
     ssize_t writeBytes = 0;
 
-    while (totalWriteBytes < nBytes) {
+    while (totalWriteBytes < nBytes) 
+	{
         writeBytes = write(iFd, pBuf, nBytes - totalWriteBytes); 
-        if (-1 == writeBytes) {
+        if (-1 == writeBytes) 
+		{
             perror("read");
             return FILEDATA_DEAL_RET_FAIL;
         }
@@ -150,13 +154,13 @@ int DataDeal_fileWrite(int iFd, const void * pBuf, ssize_t nBytes)
 
 
 /************************************************************
-* FUNCTION          :DataDeal_setFile()
-* Description       :upload files
-* Arguments         :
+* FUNCTION        :DataDeal_setFile()
+* Description     :upload files
+* Arguments       :
 * [iConnectFd][IN]:File descriptor after connection 
-*                    establishment
-* return            :success return FILEDATA_DEAL_RET_OK 
-*                    and fail return FILEDATA_DEAL_RET_FAIL
+*                  establishment
+* return          :success return FILEDATA_DEAL_RET_OK 
+*                  and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int DataDeal_setFile(int iConnectFd)
 {
@@ -536,13 +540,13 @@ int DataDeal_setFile(int iConnectFd)
 }
 
 /************************************************************
-* FUNCTION          :DataDeal_setFile()
-* Description       :download file
-* Arguments         :
+* FUNCTION        :DataDeal_setFile()
+* Description     :download file
+* Arguments       :
 * [iConnectFd][IN]:File descriptor after connection 
-*                    establishment
-* return            :success return FILEDATA_DEAL_RET_OK 
-*                    and fail return FILEDATA_DEAL_RET_FAIL
+*                  establishment
+* return          :success return FILEDATA_DEAL_RET_OK 
+*                  and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int DataDeal_getFile(int iConnectFd)
 {
@@ -1158,13 +1162,13 @@ int DataDeal_getFile(int iConnectFd)
 }
 
 /************************************************************
-* FUNCTION          :DataDeal_listFile()
-* Description       :Get a list of file servers
-* Arguments         :
+* FUNCTION        :DataDeal_listFile()
+* Description     :Get a list of file servers
+* Arguments       :
 * [iConnectFd][IN]:File descriptor after connection 
-*                    establishment
-* return            :success return FILEDATA_DEAL_RET_OK and 
-*                    fail return FILEDATA_DEAL_RET_FAIL
+*                  establishment
+* return          :success return FILEDATA_DEAL_RET_OK and 
+*                  fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int DataDeal_listFile(int iConnectFd)
 {  
@@ -1430,13 +1434,13 @@ int DataDeal_exitFile(int iConnectFd)
 }
 
 /************************************************************
-* FUNCTION            :DataDeal_protoPack()
-* Description         :Encode uiData with protobuf protocol
-* Arguments           :
+* FUNCTION          :DataDeal_protoPack()
+* Description       :Encode uiData with protobuf protocol
+* Arguments         :
 * [pstUnpackBuf][IN]:Point to the memory where the original 
-*                      uiData is stored
+*                    uiData is stored
 * [pcPackBuf][OUT]  :Save the packaged uiData
-* return              :Returns the size of the packed uiData
+* return            :Returns the size of the packed uiData
 ************************************************************/
 int DataDeal_protoPack(FILEDATA *pstUnpackBuf, char **pcPackBuf)
 {
@@ -1524,13 +1528,13 @@ int DataDeal_protoPack(FILEDATA *pstUnpackBuf, char **pcPackBuf)
 }
 
 /************************************************************
-* FUNCTION             :DataDeal_protoUnpack()
-* Description          :Decode uiData with protobuf protocol
-* Arguments:
+* FUNCTION           :DataDeal_protoUnpack()
+* Description        :Decode uiData with protobuf protocol
+* Arguments          :
 * [pcPackBuf][IN]    :Data to be unpacked
 * [pstUnpackBuf][OUT]:Store the unpacked uiData
-* return               :success return FILEDATA_DEAL_RET_OK 
-*                       and fail return FILEDATA_DEAL_RET_FAIL
+* return             :success return FILEDATA_DEAL_RET_OK 
+*                     and fail return FILEDATA_DEAL_RET_FAIL
 ************************************************************/
 int DataDeal_protoUnpack(char *pcPackBuf, FILEDATA *pstUnpackBuf, int iSize)
 {

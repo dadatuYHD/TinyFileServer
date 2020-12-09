@@ -21,7 +21,8 @@ int writeInt(unsigned int uiData, char** pDst, char* pcEndData)
     int iRet = TLV_ENCODE_RET_OK;
     
     iRet = writeBlock(pDst, sizeof(int), &i_net_data, pcEndData);
-    if (TLV_ENCODE_RET_FAIL == iRet) {
+    if (TLV_ENCODE_RET_FAIL == iRet) 
+	{
         File_error("[%s]writeBlock over lap!\n", __FUNCTION__);
         return TLV_ENCODE_RET_FAIL;
     }
@@ -41,7 +42,8 @@ int readInt(unsigned     int* uiData, char** pSrc, char* pcEndData)
     int iRet = TLV_DECODE_RET_OK;
 
     iRet = readBlock(uiData, pSrc, sizeof(int), pcEndData);
-    if (TLV_DECODE_RET_FAIL == iRet) {
+    if (TLV_DECODE_RET_FAIL == iRet) 
+	{
         File_error("[%s]readBlock over lap!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
@@ -53,15 +55,15 @@ int readInt(unsigned     int* uiData, char** pSrc, char* pcEndData)
 
 
 /************************************************************
-* FUNCTION                :tlvEncodeFile()
-* Description             :use tlv pack uiData
-* Arguments               :
-* [pstFileData][IN]     :Point to uiData to be packaged
-* [pcBuf][OUT]           :Storage of packaged uiData  
+* FUNCTION             :tlvEncodeFile()
+* Description          :use tlv pack uiData
+* Arguments            :
+* [pstFileData][IN]    :Point to uiData to be packaged
+* [pcBuf][OUT]         :Storage of packaged uiData  
 * [puiTlvTotolLen][OUT]:the size of being packaged uiData  
-* [uiBufLen][IN]        ：the size of pcBuf
-* return                  :success return TLV_ENCODE_RET_OK, 
-*                          fail return TLV_ENCODE_RET_FAIL
+* [uiBufLen][IN]       :the size of pcBuf
+* return               :success return TLV_ENCODE_RET_OK, 
+*                        fail return TLV_ENCODE_RET_FAIL
 ************************************************************/
 int tlvEncodeFile(FileData_Sp pstFileData, char* pcBuf, unsigned int* puiTlvTotolLen, unsigned int uiBufLen)
 {
@@ -103,14 +105,14 @@ int tlvEncodeFile(FileData_Sp pstFileData, char* pcBuf, unsigned int* puiTlvToto
 
 
 /************************************************************
-* FUNCTION               :tlvDecodeFile()
-* Description            :unpack the tlv uiData
-* Arguments:
-* [pstFileData][OUT]   ：Storage of unpackaged uiData 
-* [pcBuf][IN]:Storage of to be unpackaged uiData  
+* FUNCTION            :tlvDecodeFile()
+* Description         :unpack the tlv uiData
+* Arguments           :
+* [pstFileData][OUT]  :Storage of unpackaged uiData 
+* [pcBuf][IN]         :Storage of to be unpackaged uiData  
 * [puiTlvTotolLen][IN]:the size of being packaged uiData  
-* return                 :success return TLV_DECODE_RET_OK, 
-*                         fail return TLV_DECODE_RET_FAIL
+* return              :success return TLV_DECODE_RET_OK, 
+*                      fail return TLV_DECODE_RET_FAIL
 ************************************************************/
 int tlvDecodeFile(char* pcBuf, unsigned int uiTlvTotolLen, FileData_Sp pstFileData)
 {
@@ -124,17 +126,20 @@ int tlvDecodeFile(char* pcBuf, unsigned int uiTlvTotolLen, FileData_Sp pstFileDa
     unsigned int uiTlvLen = 0;
 
     readInt(&enTlvType, &pcReadData, pcEndData);
-    if (TLV_FILE_ROOT != enTlvType) {
+    if (TLV_FILE_ROOT != enTlvType) 
+	{
         File_error("[%s]read TLV_FILE_ROOT is fail!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
     
     readInt(&uiTlvLenSum, &pcReadData, pcEndData);
 
-    while (uiTlvLenSum > 0) {
+    while (uiTlvLenSum > 0) 
+	{
         readInt(&enTlvType, &pcReadData, pcEndData);
         readInt(&uiTlvLen, &pcReadData, pcEndData);
-        switch (enTlvType) {
+        switch (enTlvType) 
+		{
             case TLV_FILE_CMD:          
                 readBlock(pstFileData->m_cFileCmd, &pcReadData,  uiTlvLen, pcEndData);
                 uiTlvLenSum = uiTlvLenSum - (8 + uiTlvLen);

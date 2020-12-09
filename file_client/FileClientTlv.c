@@ -22,7 +22,8 @@ int writeInt(unsigned int uiData, char** pcDst, char *pcEndData)
     int iRet = TLV_ENCODE_RET_OK;
     
     iRet = writeBlock(pcDst, sizeof(int), &uiNetData, pcEndData);
-    if (TLV_ENCODE_RET_FAIL == iRet) {
+    if (TLV_ENCODE_RET_FAIL == iRet) 
+	{
         File_error("[%s]writeBlock over lap!\n", __FUNCTION__);
         return TLV_ENCODE_RET_FAIL;
     }
@@ -42,7 +43,8 @@ int readInt(unsigned     int* uiData, char** pcSrc, char* pcEndData)
     int iRet = TLV_DECODE_RET_OK;
 
     iRet = readBlock(uiData, pcSrc, sizeof(int), pcEndData);
-    if (TLV_DECODE_RET_FAIL == iRet) {
+    if (TLV_DECODE_RET_FAIL == iRet) 
+	{
         File_error("[%s]readBlock over lap!\n", __FUNCTION__);
         return TLV_DECODE_RET_FAIL;
     }
@@ -54,15 +56,15 @@ int readInt(unsigned     int* uiData, char** pcSrc, char* pcEndData)
 
 
 /************************************************************
-* FUNCTION                :tlvEncodeFile()
-* Description             :use tlv pack uiData
-* Arguments               :
-* [pstFileData][IN]     ：Point to uiData to be packaged
-* [pcBuf][OUT]           :Storage of packaged uiData  
+* FUNCTION             :tlvEncodeFile()
+* Description          :use tlv pack uiData
+* Arguments            :
+* [pstFileData][IN]    ：Point to uiData to be packaged
+* [pcBuf][OUT]         :Storage of packaged uiData  
 * [puiTlvTotolLen][OUT]:the size of being packaged uiData  
-* [uiBufLen][IN]        :the size of pcBuf
-* return                  :success return TLV_ENCODE_RET_OK, 
-*                          fail return TLV_ENCODE_RET_FAIL
+* [uiBufLen][IN]       :the size of pcBuf
+* return               :success return TLV_ENCODE_RET_OK, 
+*                       fail return TLV_ENCODE_RET_FAIL
 ************************************************************/
 int tlvEncodeFile(FileData_Sp pstFileData, char* pcBuf, unsigned int *puiTlvTotolLen, unsigned int uiBufLen)
 {
